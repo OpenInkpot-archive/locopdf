@@ -60,34 +60,7 @@ void choicebox_change_selection(Evas *e, Evas_Object *obj, int new_navsel)
 {
 	choice_info_struct *infostruct =
 		(choice_info_struct *) evas_object_data_get(obj,"choice_info");
-    char *tempstr;
-    if(get_nav_mode()==1) 
-    {
-        //asprintf(&tempstr,"choicelabel_%d",infostruct->navsel);
-        Evas_Object *oldselected_choice=infostruct->choicelabels[infostruct->navsel];//evas_object_name_find(e,tempstr);
-        //free(tempstr);
-        //asprintf(&tempstr,"valuelabel_%d",infostruct->navsel);
-        Evas_Object *oldselected_value;
-        if(infostruct->values)
-            oldselected_value=infostruct->valuelabels[infostruct->navsel];//evas_object_name_find(e,tempstr);
-        //free(tempstr);
-        //asprintf(&tempstr,"choicelabel_%d",new_navsel);
-        Evas_Object *newselected_choice=infostruct->choicelabels[new_navsel];//evas_object_name_find(e,tempstr);
-        //free(tempstr);
-        //asprintf(&tempstr,"valuelabel_%d",new_navsel);
-        Evas_Object *newselected_value;
-        if(infostruct->values)
-            newselected_value=infostruct->valuelabels[new_navsel];//evas_object_name_find(e,tempstr);
-        //free(tempstr);
-        
-        edje_object_signal_emit(oldselected_choice,"unselect","EVAS");
-        if(infostruct->values)
-            edje_object_signal_emit(oldselected_value,"unselect","EVAS");
-        edje_object_signal_emit(newselected_choice,"select","EVAS");
-        if(infostruct->values)
-            edje_object_signal_emit(newselected_value,"select","EVAS");
-    }
-    
+
     infostruct->navsel = new_navsel;
 }
 

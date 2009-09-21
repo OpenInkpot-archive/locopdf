@@ -21,7 +21,5 @@ typedef struct {
 /* FIXME: HACK */
 static void _key_handler(void *data, Evas *e, Evas_Object *obj, void *event_info);
 void set_key_handler(Evas_Object* obj, key_handler_info_t* handler_info);
-int get_nav_mode();
-void set_nav_mode(int mode);
 
 #endif
