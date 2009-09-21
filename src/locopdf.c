@@ -24,30 +24,29 @@
 #include <config.h>
 #endif
 
-//#include <iostream>
-#include <stdlib.h>
+#define _GNU_SOURCE
+
+#include <stdio.h>
+#include <pthread.h>
 #include <math.h>
 #include <string.h>
+#include <stdbool.h>
+#include <err.h>
 
-#include <Evas.h>
 #include <Ecore.h>
-#include <Ecore_File.h>
 #include <Ecore_Evas.h>
+#include <Ecore_File.h>
 #include <Edje.h>
+#include <Evas.h>
 #include <epdf/Epdf.h>
 
-extern "C" {
 #include <libkeys.h>
-}
 
-#include <GlobalParams.h>
 #include "dialogs.h"
 #include "locopdf.h"
 #include "database.h"
 
 #define REL_THEME "themes/themes_oitheme.edj"
-
-using namespace std;
 
 /* Uzhosnakh */
 
@@ -186,23 +185,12 @@ void set_reader_mode(int newreadermode)
 }
 int get_antialias_mode()
 {
-    return (globalParams->getAntialias() && globalParams->getVectorAntialias());
-    
+    return epdf_fonts_antialias_get() && epdf_lines_antialias_get();
 }
 void set_antialias_mode(int newantialiasmode)
 {
-    if(newantialiasmode)
-    {
-        globalParams->setAntialias("yes");
-        globalParams->setVectorAntialias("yes");
-    }
-    else
-    {
-        globalParams->setAntialias("no");
-        globalParams->setVectorAntialias("no");
-        
-    }
-    
+    epdf_fonts_antialias_set(newantialiasmode ? 1 : 0);
+    epdf_lines_antialias_set(newantialiasmode ? 1 : 0);
 }
 int get_num_pages()
 {
@@ -276,6 +264,10 @@ void render_cur_page()
         scalex=1.0;
         scaley=1.0;
         
+    }
+    else
+    {
+        err(1, "Unknown fitmode passed to page rendering function: %d", fitmode);
     }
     
     epdf_page_scale_set (page,scalex,scaley);
@@ -353,6 +345,10 @@ void *thread_func(void *vptr_args)
         scalex=1.0;
         scaley=1.0;
         
+    }
+    else
+    {
+        err(1, "Unknown fitmode passed to background renderer: %d", fitmode);
     }
     
     epdf_page_scale_set (page,scalex,scaley);
@@ -624,7 +620,7 @@ void save_global_settings(char *filename)
 void restore_global_settings(char *filename)
 {
     int temp11,temp12,temp13,temp14;
-    double temp21,temp22,temp23,temp24;
+    double temp21,temp22;
     temp11=get_setting_INT(filename,"current_page");
     if(temp11>=0)
         curpage=temp11;
@@ -683,11 +679,8 @@ int main(int argc, char *argv[])
     ecore_init();
     ecore_evas_init();
     edje_init();
-    
-    if (!globalParams)
-        globalParams = new GlobalParams();
-    globalParams->setAntialias("yes");
-    globalParams->setVectorAntialias("yes");
+
+    set_antialias_mode(true);
     /* setup database */
     
     const char *homedir=getenv("HOME");
@@ -754,21 +747,14 @@ int main(int argc, char *argv[])
 
     o1 = evas_object_image_add (evas);
     
-    
-    char *temp11,*temp12;
-    if(dbres!=(-1))
+
+    int init_x = 0;
+    int init_y = 0;
+    if(dbres != -1)
     {
-        temp11=get_setting(argv[1],"current_x");
-        temp12=get_setting(argv[1],"current_y");
+        init_x = get_setting_INT(argv[1], "current_x");
+        init_y = get_setting_INT(argv[1], "current_y");
     }
-    if(temp11 && temp12 && dbres!=(-1))
-        evas_object_move (o1,(int)strtol(temp11,NULL,10),(int)strtol(temp12,NULL,10));
-    else
-        evas_object_move(o1,0,0);
-    if(temp11)
-        free(temp11);
-    if(temp12)
-        free(temp12);
     evas_object_name_set(o1, "pdfobj1");
     evas_object_show (o1);
     if(dbres!=(-1))

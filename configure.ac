@@ -2,8 +2,8 @@ AC_PREREQ(2.57)
 AC_INIT(locopdf, 0.1, quickhand@openinkpot.org)
 AM_INIT_AUTOMAKE(foreign)
 
-AC_LANG_CPLUSPLUS
-AC_PROG_CXX
+AC_LANG_C
+AC_PROG_CC_C99
 PKG_PROG_PKG_CONFIG
 
 PKG_CHECK_MODULES(EFL,[ecore ecore-file ecore-evas evas edje])

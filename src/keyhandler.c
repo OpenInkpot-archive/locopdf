@@ -18,11 +18,13 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
+#include <string.h>
+#include <ctype.h>
+
 #include <Evas.h>
 #include <Ecore_Evas.h>
+
 #include "keyhandler.h"
-#include <iostream>
-#include <cstring>
 
 /* FIXME: HACK */
 static void _key_handler(void *data, Evas *evas, Evas_Object *obj, void *event_info)

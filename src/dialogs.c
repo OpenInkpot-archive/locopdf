@@ -18,14 +18,14 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
+#define _GNU_SOURCE
+
+#include <stdio.h>
 
 #include "dialogs.h"
 #include "choicebox.h"
 #include "entrybox.h"
 #include "locopdf.h"
-#include <iostream>
-#include <cstdlib>
-#include <cstring>
 
 const char *FIT_STRINGS[] = { 		
 		"Fit Width",
@@ -258,7 +258,7 @@ void fitmode_choicehandler(Evas *e, Evas_Object *parent,int choice, bool lp)
         update_label(e,preferenceschoicebox,4,FIT_STRINGS[choice]);
         
         evas_object_focus_set(choicebox_get_parent(e,parent),1);
-        fini_choicebox(e,parent,false);
+        fini_choicebox(e,parent);
         render_cur_page();
         prerender_next_page();
     }
@@ -283,7 +283,7 @@ void FitModeDialog(Evas *e, Evas_Object *obj)
         "",
 	};
     
-	fitmodechoicebox=init_choicebox(e,initchoices, values, 5, fitmode_choicehandler, "Fit Mode Settings",obj,NULL, true);
+	fitmodechoicebox=init_choicebox(e,initchoices, values, 5, fitmode_choicehandler, "Fit Mode Settings",obj,NULL);
     
     int x,y,w,h;
     evas_object_geometry_get(fitmodechoicebox,&x,&y,&w,&h);
@@ -349,7 +349,7 @@ void TrimmingDialog(Evas *e, Evas_Object *obj)
 		bottomtrim,
 	};
     
-	trimmingchoicebox=init_choicebox(e,initchoices, values, 4, trimming_choicehandler, "Trimming Settings",obj, NULL,true);
+	trimmingchoicebox=init_choicebox(e,initchoices, values, 4, trimming_choicehandler, "Trimming Settings",obj, NULL);
     
     int x,y,w,h;
     evas_object_geometry_get(trimmingchoicebox,&x,&y,&w,&h);
@@ -441,7 +441,7 @@ void PreferencesDialog(Evas *e, Evas_Object *obj)
         OFF_ON_STRINGS[get_reader_mode()],
 	};
     
-	preferenceschoicebox=init_choicebox(e,initchoices, values, 7, preferences_choicehandler, "LoCoPDF Settings",obj, NULL,true);
+	preferenceschoicebox=init_choicebox(e,initchoices, values, 7, preferences_choicehandler, "LoCoPDF Settings",obj, NULL);
     int x,y,w,h;
     evas_object_geometry_get(preferenceschoicebox,&x,&y,&w,&h);
     evas_object_move(preferenceschoicebox,(int)(((double)get_win_width()-w)/2.0),(int)(((double)get_win_height()-h)/2.0));
@@ -463,7 +463,7 @@ void toc_choicehandler(Evas *e, Evas_Object *parent,int choice, bool lp)
         Evas_Object *nextcb;
         while((nextcb=choicebox_get_parent(e,curcb)))
         {
-            fini_choicebox(e,curcb,false);   
+            fini_choicebox(e,curcb);   
             curcb=nextcb;
         }
         evas_object_focus_set(curcb,1);
@@ -490,7 +490,7 @@ void TOCDialog(Evas *e, Evas_Object *obj,Ecore_List *list)
         
     }
     
-	Evas_Object *tocchoicebox=init_choicebox(e,(const char**)initchoices,NULL, numchoices, toc_choicehandler, "Table of Contents",obj,(void *)list, true);
+	Evas_Object *tocchoicebox=init_choicebox(e,(const char**)initchoices,NULL, numchoices, toc_choicehandler, "Table of Contents",obj,(void *)list);
     for(i=0;i<numchoices;i++)
     {
 

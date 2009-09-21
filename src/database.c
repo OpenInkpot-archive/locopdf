@@ -1,10 +1,17 @@
+#define _GNU_SOURCE
+
 #include <stdio.h>
 #include <stdlib.h>
-#include <fcntl.h>
-#include <sqlite3.h>
 #include <sys/stat.h>
-#include "database.h"
 
+//#include <fcntl.h>
+//#include <stdio.h>
+//#include <stdlib.h>
+//#include <sys/stat.h>
+
+#include <sqlite3.h>
+
+#include "database.h"
 
 static struct sqlite3 *locopdf_database=NULL;
 long get_file_index(char *filename,int create_entry_if_missing);
@@ -149,30 +156,26 @@ long get_file_index(char *filename,int create_entry_if_missing)
     sqlite3_free_table(resultp);
     return retval;
 }
-int set_setting(char *filename,char *settingname,char *value)
+void set_setting(char *filename,char *settingname,char *value)
 {
     long fileindex=get_file_index(filename,1);
     char *temp=sqlite3_mprintf("INSERT OR REPLACE INTO settings (fileid,settingname,value) VALUES (%d,\'%q\',\'%q\')",fileindex,settingname,value);
     sqlite3_exec(locopdf_database,temp,NULL,NULL,NULL);
     sqlite3_free(temp);
 }
-int set_setting_INT(char *filename,char *settingname,int value)
+void set_setting_INT(char *filename,char *settingname,int value)
 {
     char *tempstr;
     asprintf(&tempstr,"%d",value);
-    int tempo=set_setting(filename,settingname,tempstr);
+    set_setting(filename,settingname,tempstr);
     free(tempstr);
-    return tempo;
 }
-int set_setting_DOUBLE(char *filename,char *settingname,double value)
+void set_setting_DOUBLE(char *filename,char *settingname,double value)
 {
     char *tempstr;
     asprintf(&tempstr,"%f",value);
-    int tempo=set_setting(filename,settingname,tempstr);
+    set_setting(filename,settingname,tempstr);
     free(tempstr);
-    return tempo;
-    
-    
 }
 char *get_setting(char *filename,char *settingname)
 {
@@ -184,7 +187,7 @@ char *get_setting(char *filename,char *settingname)
     char **resultp=NULL;
     int rows,cols;
     char *temp=sqlite3_mprintf("SELECT value FROM settings WHERE fileid = %d AND settingname = \'%q\'",fileindex,settingname);
-    int result= sqlite3_get_table(locopdf_database,temp,&resultp,&rows,&cols,NULL);
+    sqlite3_get_table(locopdf_database,temp,&resultp,&rows,&cols,NULL);
     sqlite3_free(temp);
     if(rows<=0)
     {

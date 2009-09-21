@@ -23,19 +23,15 @@
 #include <config.h>
 #endif
 
-#include <iostream>
-#include <cstdlib>
-#include <cstring>
-
+#include <string.h>
 
 #include <Evas.h>
 #include <Ecore_Evas.h>
 #include <Edje.h>
+
 #include "keyhandler.h"
 #include "entrybox.h"
 #include "locopdf.h"
-
-
 
 
 typedef struct _entry_info_struct {
@@ -157,10 +153,7 @@ Evas_Object *init_entrybox(Evas *evas,const char* title,const char *defaultentry
 
 void fini_entrybox(Evas *e, Evas_Object *obj)
 {
-	entry_info_struct *infostruct =(entry_info_struct *) evas_object_data_get(obj,"entry_info");
-	//free(infostruct->entry);
     evas_object_del(obj);
-	
 }
 
 
