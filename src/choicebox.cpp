@@ -23,9 +23,8 @@
 #include <config.h>
 #endif
 
-#include <iostream>
-#include <cstdlib>
-#include <cstring>
+#include <stdlib.h>
+#include <string.h>
 
 
 #include <Evas.h>
