@@ -44,9 +44,8 @@ extern "C" {
 #include "dialogs.h"
 #include "locopdf.h"
 #include "database.h"
-#define REL_THEME "themes/themes_oitheme.edj"
 
-#define ROUND(f) (int)floor(f + 0.5)
+#define REL_THEME "themes/themes_oitheme.edj"
 
 using namespace std;
 
