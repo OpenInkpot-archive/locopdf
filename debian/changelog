@@ -1,3 +1,12 @@
+locopdf (0.1-6) asimov; urgency=low
+
+  * Switch from cdbs to plain debhelper
+  * libkeyize locopdf (OI#413, OI#438)
+  * Cleanup unused code
+  * Rewrite remaining bits of C++ to C
+
+ -- Mikhail Gusarov <dottedmag@dottedmag.net>  Mon, 21 Sep 2009 20:53:54 +0700
+
 locopdf (0.1-5) asimov; urgency=low
 
   * Added locopdf.desktop
