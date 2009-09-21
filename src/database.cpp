@@ -152,34 +152,9 @@ long get_file_index(char *filename,int create_entry_if_missing)
 int set_setting(char *filename,char *settingname,char *value)
 {
     long fileindex=get_file_index(filename,1);
-    char **resultp=NULL;
-    int rows,cols;
-    char *temp=sqlite3_mprintf("SELECT value FROM settings WHERE fileid = %d AND settingname = \'%q\'",fileindex,settingname);
-    if(sqlite3_get_table(locopdf_database,temp,&resultp,&rows,&cols,NULL)!=SQLITE_OK)
-    {
-        sqlite3_free(temp);
-        sqlite3_free_table(resultp);    
-        return -1;
-    }
-    else
-    {
-        sqlite3_free(temp);
-    }
-    
-    if(rows==0)
-    {
-        temp=sqlite3_mprintf("INSERT INTO settings (fileid,settingname,value) VALUES(%d,\'%q\',\'%q\')",fileindex,settingname,value);
-        sqlite3_exec(locopdf_database,temp,NULL,NULL,NULL);
-        sqlite3_free(temp);
-        
-    }
-    else
-    {
-        temp=sqlite3_mprintf("UPDATE settings SET value=\'%q\' WHERE fileid=%d AND settingname=\'%q\'",value,fileindex,settingname);
-        sqlite3_exec(locopdf_database,temp,NULL,NULL,NULL);
-        sqlite3_free(temp);
-    }
-    sqlite3_free_table(resultp);
+    char *temp=sqlite3_mprintf("INSERT OR REPLACE INTO settings (fileid,settingname,value) VALUES (%d,\'%q\',\'%q\')",fileindex,settingname,value);
+    sqlite3_exec(locopdf_database,temp,NULL,NULL,NULL);
+    sqlite3_free(temp);
 }
 int set_setting_INT(char *filename,char *settingname,int value)
 {
