@@ -664,6 +664,7 @@ static key_handler_info_t main_info =
 
 void save_global_settings(char *filename)
 {
+    begin_transaction();
     set_setting_INT(filename,"current_page",curpage);
     set_setting_DOUBLE(filename,"zoom_increment",zoominc);
     set_setting_DOUBLE(filename,"current_zoom",zoom);
@@ -675,6 +676,7 @@ void save_global_settings(char *filename)
     set_setting_INT(filename,"bottom_trim",bottomtrim);
     set_setting_INT(filename,"fit_mode",fitmode);
     set_setting_INT(filename,"reader_mode",readermode);
+    commit_transaction();
 }
 void restore_global_settings(char *filename)
 {

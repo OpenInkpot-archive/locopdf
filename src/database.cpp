@@ -220,3 +220,12 @@ void fini_database()
     locopdf_database=NULL;
 }
 
+void begin_transaction()
+{
+    sqlite3_exec(locopdf_database, "BEGIN", NULL, NULL, NULL);
+}
+
+void commit_transaction()
+{
+    sqlite3_exec(locopdf_database, "COMMIT", NULL, NULL, NULL);
+}

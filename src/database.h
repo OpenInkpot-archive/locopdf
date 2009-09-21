@@ -10,6 +10,8 @@
 int init_database(char *filename);
 void fini_database();
 
+void begin_transaction();
+void commit_transaction();
 
 int get_file_record_status(char *filename);
 int update_file_mod_time(char *filename);
