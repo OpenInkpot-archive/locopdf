@@ -1,3 +1,9 @@
+locopdf (0.1-7) asimov; urgency=low
+
+  * Fixed N516 keybindings for Down/PageDown.
+
+ -- Mikhail Gusarov <dottedmag@dottedmag.net>  Mon, 21 Sep 2009 22:34:43 +0700
+
 locopdf (0.1-6) asimov; urgency=low
 
   * Switch from cdbs to plain debhelper
