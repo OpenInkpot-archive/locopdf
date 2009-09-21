@@ -9,5 +9,6 @@ PKG_PROG_PKG_CONFIG
 PKG_CHECK_MODULES(EFL,[ecore ecore-file ecore-evas evas edje])
 PKG_CHECK_MODULES(EPDF, [epdf])
 PKG_CHECK_MODULES(SQLITE, [sqlite3])
+PKG_CHECK_MODULES(LIBKEYS, [libkeys])
 
-AC_OUTPUT(Makefile src/Makefile themes/Makefile)
+AC_OUTPUT(Makefile src/Makefile themes/Makefile data/Makefile)

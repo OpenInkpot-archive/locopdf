@@ -24,17 +24,23 @@
 #include <config.h>
 #endif
 
-#include <iostream>
-#include <cstdlib>
-#include <cmath>
+//#include <iostream>
+#include <stdlib.h>
+#include <math.h>
+#include <string.h>
+
 #include <Evas.h>
 #include <Ecore.h>
 #include <Ecore_File.h>
 #include <Ecore_Evas.h>
 #include <Edje.h>
 #include <epdf/Epdf.h>
+
+extern "C" {
+#include <libkeys.h>
+}
+
 #include <GlobalParams.h>
-#include "keyhandler.h"
 #include "dialogs.h"
 #include "locopdf.h"
 #include "database.h"
@@ -44,6 +50,9 @@
 
 using namespace std;
 
+/* Uzhosnakh */
+
+static keys_t* keys;
 
 pthread_t thread;
 
@@ -76,7 +85,15 @@ int winheight=800;
 /*
  * Returns edje theme file name.
  */
- 
+
+static Evas_Object* get_pdf_object(Evas* canvas)
+{
+    if(curpdfobj == 1)
+        return evas_object_name_find(canvas, "pdfobj2");
+    else
+        return evas_object_name_find(canvas, "pdfobj1");
+}
+
 char *get_theme_file()
 {
  	//char *cwd = get_current_dir_name();
@@ -439,7 +456,8 @@ void flip_pages()
     evas_object_hide(active);
     evas_object_show(inactive);
 }
-void next_page()
+
+static void next_page()
 {
     if(curpage>=(numpages-1))
         return;
@@ -452,14 +470,14 @@ void next_page()
 
 
 }
-void prev_page()
+
+static void prev_page()
 {
-    if(curpage<=0)
+    if(curpage <= 0)
         return;
     curpage--;
     reset_cur_panning();
     render_cur_page();
-    
     prerender_next_page();
 }
 
@@ -467,87 +485,64 @@ void prev_page()
 
 /* Main key handler */
 
-void main_esc(Evas *e, Evas_Object *obj)
+static void _quit()
 {
     ecore_main_loop_quit();
 }
 
-void main_ok(Evas *e, Evas_Object *obj)
+static void _settings(Evas* canvas)
 {
-    Evas_Object *bgobj=evas_object_name_find(evas,"background");
-    PreferencesDialog(evas,bgobj);
-    
+    Evas_Object* bgobj = evas_object_name_find(canvas, "background");
+    PreferencesDialog(evas, bgobj);
 }
 
-void main_plus(Evas *e, Evas_Object *obj)
+static void _zoom_in(Evas* canvas)
 {
-    Evas_Object *pdfobj;
-    if(curpdfobj==1)
-        pdfobj=evas_object_name_find(evas,"pdfobj1");
-    else
-        pdfobj=evas_object_name_find(evas,"pdfobj2"); 
+    Evas_Object* pdfobj = get_pdf_object(canvas);
     int x,y,w,h;
     evas_object_geometry_get(pdfobj,&x,&y,&w,&h);
-    int new_w=ROUND(((double)w)*(zoom+zoominc)/zoom);
-    int new_h=ROUND(((double)h)*(zoom+zoominc)/zoom);
+    long int new_w = lround(((double)w)*(zoom+zoominc)/zoom);
+    long int new_h = lround(((double)h)*(zoom+zoominc)/zoom);
     if(are_legal_coords(x,y,x+new_w,y+new_h))
     {
-        zoom+=zoominc;
+        zoom += zoominc;
         render_cur_page();
         prerender_next_page();
     }
 }
-void main_minus(Evas *e, Evas_Object *obj)
+
+static void _zoom_out(Evas* canvas)
 {
-    if((zoom-zoominc)>0)
+    if(zoom > zoominc)
     {
-        Evas_Object *pdfobj;
-        if(curpdfobj==1)
-            pdfobj=evas_object_name_find(evas,"pdfobj1");
-        else
-            pdfobj=evas_object_name_find(evas,"pdfobj2"); 
+        Evas_Object* pdfobj = get_pdf_object(canvas);
         int x,y,w,h;
-        evas_object_geometry_get(pdfobj,&x,&y,&w,&h);
-        int new_w=ROUND(((double)w)*(zoom-zoominc)/zoom);
-        int new_h=ROUND(((double)h)*(zoom-zoominc)/zoom);
-        if(are_legal_coords(x,y,x+new_w,y+new_h))
+        evas_object_geometry_get(pdfobj, &x, &y, &w, &h);
+        long int new_w = lround(((double)w) * (zoom - zoominc) / zoom);
+        long int new_h = lround(((double)h) * (zoom - zoominc) / zoom);
+        if(are_legal_coords(x, y, x+new_w, y+new_h))
         {
-            zoom-=zoominc;
+            zoom -= zoominc;
             render_cur_page();
             prerender_next_page();
         }
     }
 }
-void main_nav_up(Evas *e, Evas_Object *obj)
-{
-    
-}
 
-void main_nav_down(Evas *e, Evas_Object *obj)
+static void _page_up()
 {
-    
-}
-
-void main_nav_left(Evas *e, Evas_Object *obj)
-{
-    
     prev_page();
 }
 
-void main_nav_right(Evas *e, Evas_Object *obj)
+static void _page_down(Evas* canvas)
 {
     if(readermode)
     {
-        Evas_Object *pdfobj;
-        int pan_amt=(-1)*ROUND(((double)get_win_height())*vpaninc);
-        if(curpdfobj==1)
-            pdfobj=evas_object_name_find(evas,"pdfobj1");
-        else
-            pdfobj=evas_object_name_find(evas,"pdfobj2"); 
+        Evas_Object *pdfobj = get_pdf_object(canvas);
+        long int pan_amt=-lround(((double)get_win_height())*vpaninc);
         int x,y,w,h;
         evas_object_geometry_get(pdfobj,&x,&y,&w,&h);
-    
-    
+
         if(are_legal_coords(x,y+pan_amt,x+w,y+h+pan_amt))
             pan_cur_page(0,pan_amt);
         else
@@ -557,110 +552,59 @@ void main_nav_right(Evas *e, Evas_Object *obj)
         next_page();
 }
 
-void main_nav_sel(Evas *e, Evas_Object *obj)
+static void _pan(Evas* canvas, int dx, int dy)
 {
-    
-    
+    pan_cur_page(lround(dx*((double)get_win_width())*hpaninc),
+                 lround(dy*((double)get_win_height())*vpaninc));
 }
-void main_nav_menubtn(Evas *e, Evas_Object *obj)
+
+static void _go_to_page(Evas* canvas)
 {
-    
-    
-    
+    Evas_Object* bgobj = evas_object_name_find(canvas, "background");
+    GotoPageEntry(canvas, bgobj);
 }
-void main_item(Evas *e, Evas_Object *obj,int index, bool lp)
+
+static void _toc(Evas* canvas)
 {
-    //int paninc=5;
-    if(index==1)
+    if(pdf_index)
     {
-        
-        
-        Evas_Object *bgobj=evas_object_name_find(evas,"background");
-        GotoPageEntry(evas,bgobj);  
-    }
-    else if(index==2)
-    {
-       
-        
-        pan_cur_page(0,ROUND(((double)get_win_height())*vpaninc));
-    }
-    else if(index==3)
-    {
-        
-        if(pdf_index)
-            TOCDialog(e,obj,pdf_index);
-    }
-    else if(index==4)
-    {
-        
-        
-    }
-    else if(index==5)
-    {
-        //reset_cur_panning();
-        
-    }
-    else if(index==6)
-    {
-          
-        
-        pan_cur_page(ROUND(((double)get_win_width())*hpaninc),0);
-    }
-    else if(index==7)
-    {
-        
-        
-        pan_cur_page(0,(-1)*ROUND(((double)get_win_height())*vpaninc));
-    }
-    else if(index==8)
-    {
-        
-        
-        pan_cur_page((-1)*ROUND(((double)get_win_width())*hpaninc),0);
-    }
-    else if(index==9)
-    {
-        prev_page();    
-        
-    }
-    else if(index==0)
-    {
-        if(readermode)
-        {
-            Evas_Object *pdfobj;
-            int pan_amt=(-1)*ROUND(((double)get_win_height())*vpaninc);
-            if(curpdfobj==1)
-                pdfobj=evas_object_name_find(evas,"pdfobj1");
-            else
-                pdfobj=evas_object_name_find(evas,"pdfobj2"); 
-            int x,y,w,h;
-            evas_object_geometry_get(pdfobj,&x,&y,&w,&h);
-    
-    
-            if(are_legal_coords(x,y+pan_amt,x+w,y+h+pan_amt))
-                pan_cur_page(0,pan_amt);
-            else
-                next_page();
-        }
-        else
-            next_page();
+        Evas_Object* bgobj = evas_object_name_find(canvas, "background");
+        TOCDialog(canvas, bgobj, pdf_index);
     }
 }
 
-static key_handler_info_t main_info =
+static void _key_handler(void* data, Evas* canvas, Evas_Object* obj,
+                         void* event_info)
 {
-    main_ok,
-    main_esc,
-    main_nav_up,
-    main_nav_down,
-    main_nav_left,
-    main_nav_right,
-    main_nav_sel,
-    main_nav_menubtn,
-    main_plus,
-    main_minus,
-    main_item
-};
+    Evas_Event_Key_Up* e = (Evas_Event_Key_Up*)event_info;
+    const char* action = keys_lookup_by_event(keys, "main", e);
+    if(!action) return;
+
+    if(!strcmp(action, "Quit"))
+        _quit();
+    else if(!strcmp(action, "Settings"))
+        _settings(canvas);
+    else if(!strcmp(action, "PageUp"))
+        _page_up();
+    else if(!strcmp(action, "PageDown"))
+        _page_down(canvas);
+    else if(!strcmp(action, "ZoomIn"))
+        _zoom_in(canvas);
+    else if(!strcmp(action, "ZoomOut"))
+        _zoom_out(canvas);
+    else if(!strcmp(action, "GoToPage"))
+        _go_to_page(canvas);
+    else if(!strcmp(action, "PanUp"))
+        _pan(canvas, 0, -1);
+    else if(!strcmp(action, "PanDown"))
+        _pan(canvas, 0, 1);
+    else if(!strcmp(action, "PanLeft"))
+        _pan(canvas, -1, 0);
+    else if(!strcmp(action, "PanRight"))
+        _pan(canvas, 1, 0);
+    else if(!strcmp(action, "ToC"))
+        _toc(canvas);
+}
 
 void save_global_settings(char *filename)
 {
@@ -733,6 +677,8 @@ int main(int argc, char *argv[])
     
     Evas_Object *bg,*o1,*o2;
 
+    keys = keys_alloc("locopdf");
+
     /* initialize our libraries */
     evas_init();
     ecore_init();
@@ -778,7 +724,7 @@ int main(int argc, char *argv[])
     evas_object_resize(bg, 600, 800);
     evas_object_name_set(bg, "background");
     evas_object_focus_set(bg, 1);
-    set_key_handler(bg,&main_info);
+    evas_object_event_callback_add(bg, EVAS_CALLBACK_KEY_UP, _key_handler, NULL);
     evas_object_show(bg);
     
 
