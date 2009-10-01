@@ -1,6 +1,7 @@
 [Desktop Entry]
 Name=LocoPDF
 GenericName=PDF viewer
+GenericName[bg]=Преглед на PDF документи
 GenericName[pl]=Przeglądarka plików PDF
 Exec=locopdf %F
 Type=Application
