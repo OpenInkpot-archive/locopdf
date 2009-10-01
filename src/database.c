@@ -27,7 +27,7 @@ int init_database(char *filename)
     }
     //,cur_page INTEGER,zoominc REAL,curzoom REAL,hpaninc REAL,vpaninc REAL,curx INTEGER,cury INTEGER,left_trim INTEGER,right_trim INTEGER,top_trim INTEGER,bottom_trim INTEGER
     sqlite3_exec(locopdf_database,"CREATE TABLE files(fileid INTEGER PRIMARY KEY,filename TEXT UNIQUE,mod_time INTEGER)",NULL,NULL,NULL);
-    sqlite3_exec(locopdf_database,"CREATE TABLE settings(fileid INTEGER,settingname TEXT,value TEXT)",NULL,NULL,NULL);
+    sqlite3_exec(locopdf_database,"CREATE TABLE settings(fileid INTEGER,settingname TEXT,value TEXT, UNIQUE(fileid, settingname))",NULL,NULL,NULL);
     return 0;
 }
 
