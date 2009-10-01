@@ -87,9 +87,9 @@ int winheight=800;
 static Evas_Object* get_pdf_object(Evas* canvas)
 {
     if(curpdfobj == 1)
-        return evas_object_name_find(canvas, "pdfobj2");
-    else
         return evas_object_name_find(canvas, "pdfobj1");
+    else
+        return evas_object_name_find(canvas, "pdfobj2");
 }
 
 char *get_theme_file()
