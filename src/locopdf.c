@@ -92,6 +92,27 @@ static Evas_Object* get_pdf_object(Evas* canvas)
         return evas_object_name_find(canvas, "pdfobj2");
 }
 
+static void main_win_resize_handler(Ecore_Evas* main_win)
+{
+    int w, h;
+    Evas *canvas = ecore_evas_get(main_win);
+    evas_output_size_get(canvas, &w, &h);
+
+    winwidth = w;
+    winheight = h;
+
+    Evas_Object *bg = evas_object_name_find(canvas, "background");
+    evas_object_resize(bg, w, h);
+
+    render_cur_page();
+    prerender_next_page();
+}
+
+static void main_win_delete_handler(Ecore_Evas* main_win)
+{
+    ecore_main_loop_quit();
+}
+
 char *get_theme_file()
 {
  	//char *cwd = get_current_dir_name();
@@ -730,6 +751,9 @@ int main(int argc, char *argv[])
     ecore_evas_shaped_set(ee, 0);
     ecore_evas_title_set(ee, "LoCoPDF");
     ecore_evas_show(ee);
+
+    ecore_evas_callback_resize_set(ee, main_win_resize_handler);
+    ecore_evas_callback_delete_request_set(ee, main_win_delete_handler);
 
     /* get a pointer our new Evas canvas */
     evas = ecore_evas_get(ee);
