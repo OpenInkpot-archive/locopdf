@@ -732,7 +732,7 @@ int main(int argc, char *argv[])
     const char *homedir=getenv("HOME");
     char *settingsdir;
     asprintf(&settingsdir,"%s/%s",homedir,".locopdf/");
-    if(!ecore_file_path_dir_exists(settingsdir))
+    if(!(ecore_file_exists(settingsdir) && ecore_file_is_dir(settingsdir)))
     {
         ecore_file_mkpath(settingsdir);
     }
