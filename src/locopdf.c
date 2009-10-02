@@ -524,9 +524,30 @@ static void _zoom_out(Evas* canvas)
     }
 }
 
-static void _page_up()
+static void _page_up(Evas* canvas)
 {
-    prev_page();
+    if(readermode)
+    {
+        Evas_Object *pdfobj = get_pdf_object(canvas);
+        long int pan_amt=lround(((double)get_win_height())*vpaninc);
+        int x,y,w,h;
+        evas_object_geometry_get(pdfobj,&x,&y,&w,&h);
+
+        if(y < 0 && y + pan_amt > 0)
+            pan_amt = -y;
+
+        if(y + pan_amt <= 0 && are_legal_coords(x,y+pan_amt,x+w,y+h+pan_amt))
+            pan_cur_page(0,pan_amt);
+        else {
+            prev_page();
+
+            Evas_Object *pdfobj = get_pdf_object(canvas);
+            evas_object_geometry_get(pdfobj,&x,&y,&w,&h);
+            pan_cur_page(0, winheight - h);
+        }
+    }
+    else
+        prev_page();
 }
 
 static void _page_down(Evas* canvas)
@@ -538,7 +559,11 @@ static void _page_down(Evas* canvas)
         int x,y,w,h;
         evas_object_geometry_get(pdfobj,&x,&y,&w,&h);
 
-        if(are_legal_coords(x,y+pan_amt,x+w,y+h+pan_amt))
+        int endoffset = y + h;
+        if(endoffset >= winheight && endoffset + pan_amt < winheight)
+            pan_amt = winheight - endoffset;
+
+        if(pan_amt && are_legal_coords(x,y+pan_amt,x+w,y+h+pan_amt))
             pan_cur_page(0,pan_amt);
         else
             next_page();
@@ -580,7 +605,7 @@ static void _key_handler(void* data, Evas* canvas, Evas_Object* obj,
     else if(!strcmp(action, "Settings"))
         _settings(canvas);
     else if(!strcmp(action, "PageUp"))
-        _page_up();
+        _page_up(canvas);
     else if(!strcmp(action, "PageDown"))
         _page_down(canvas);
     else if(!strcmp(action, "ZoomIn"))
