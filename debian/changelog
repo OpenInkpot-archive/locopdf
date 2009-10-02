@@ -1,3 +1,13 @@
+locopdf (0.1-8) asimov; urgency=low
+
+  * Fix config dir creatio
+  * Add resize and delete request handlers
+  * Make Reader Mode work also while navigating back
+  * Fix Reader Mode
+  * Add UNIQUE constraint so that INSERT OR UPDATE works
+
+ -- Alexander Kerner <lunohod@openinkpot.org>  Fri, 02 Oct 2009 16:58:43 +0200
+
 locopdf (0.1-7) asimov; urgency=low
 
   * Fixed N516 keybindings for Down/PageDown.
