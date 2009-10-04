@@ -4,6 +4,7 @@ GenericName=PDF viewer
 GenericName[bg]=Преглед на PDF документи
 GenericName[hu]=PDF olvasó
 GenericName[pl]=Przeglądarka plików PDF
+GenericName[zh]=PDF查看器
 Exec=locopdf %F
 Type=Application
 Categories=Office;Viewer;Literature;
