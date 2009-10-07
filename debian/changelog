@@ -1,9 +1,8 @@
-locopdf (0.1-9) UNRELEASED; urgency=low
+locopdf (0.1-9) asimov; urgency=low
 
-  [Mikhail Gusarov]
   * Translations for .desktop: Chinese, Hungarian, Czech.
 
- -- Mikhail Gusarov <dottedmag@dottedmag.net>  Mon, 05 Oct 2009 03:07:00 +0700
+ -- Mikhail Gusarov <dottedmag@dottedmag.net>  Wed, 07 Oct 2009 16:34:54 +0700
 
 locopdf (0.1-8) asimov; urgency=low
 
