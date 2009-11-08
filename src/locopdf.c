@@ -614,6 +614,16 @@ static void _toc(Evas* canvas)
     }
 }
 
+void reset_zoom_and_pan()
+{
+    zoom = 1.0;
+    evas_object_move(evas_object_name_find(evas,"pdfobj1"), 0, 0);
+    evas_object_move(evas_object_name_find(evas,"pdfobj2"), 0, 0);
+
+    render_cur_page();
+    prerender_next_page();
+}
+
 static void _key_handler(void* data, Evas* canvas, Evas_Object* obj,
                          void* event_info)
 {
@@ -645,6 +655,8 @@ static void _key_handler(void* data, Evas* canvas, Evas_Object* obj,
         _pan(canvas, 1, 0);
     else if(!strcmp(action, "ToC"))
         _toc(canvas);
+    else if(!strcmp(action, "ResetView"))
+        reset_zoom_and_pan();
 }
 
 void save_global_settings(char *filename)
