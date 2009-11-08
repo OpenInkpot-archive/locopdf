@@ -1,3 +1,13 @@
+locopdf (0.1-10) asimov; urgency=low
+
+  * enable Reader Mode by default
+  * bind ResetView to KP_4
+  * add ResetView action
+  * do not reset horizontal panning on page turn
+  * build with emupdf
+
+ -- Alexander Kerner <lunohod@openinkpot.org>  Sun, 08 Nov 2009 15:56:40 +0100
+
 locopdf (0.1-9) asimov; urgency=low
 
   * Translations for .desktop: Chinese, Hungarian, Czech.
