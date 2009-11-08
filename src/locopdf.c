@@ -422,21 +422,21 @@ void pan_cur_page(int panx,int pany)
 
 void reset_cur_panning()
 {
+    Evas_Coord x;
     Evas_Object *pdfobj;
     if(curpdfobj==1)
         pdfobj=evas_object_name_find(evas,"pdfobj1");
     else
         pdfobj=evas_object_name_find(evas,"pdfobj2"); 
-    evas_object_move (pdfobj,0,0);    
+
+    evas_object_geometry_get(pdfobj, &x, NULL, NULL, NULL);
+    evas_object_move(evas_object_name_find(evas,"pdfobj1"), x, 0);
+    evas_object_move(evas_object_name_find(evas,"pdfobj2"), x, 0);
 }
 void reset_next_panning()
 {
-    Evas_Object *pdfobj;
-    if(curpdfobj==1)
-        pdfobj=evas_object_name_find(evas,"pdfobj2");
-    else
-        pdfobj=evas_object_name_find(evas,"pdfobj1"); 
-    evas_object_move (pdfobj,0,0);    
+    reset_cur_panning();
+    return;
 }
 void ensure_thread_dead()
 {
