@@ -2,11 +2,12 @@
 #define LOCOPDF_H_
 
 #include <Epdf.h>
-#define FIT_WIDTH 0
-#define FIT_HEIGHT 1
-#define FIT_BEST 2
-#define FIT_STRETCH 3
-#define FIT_NO 4
+#define FIT_TEXT_WIDTH 0
+#define FIT_WIDTH 1
+#define FIT_HEIGHT 2
+#define FIT_BEST 3
+#define FIT_STRETCH 4
+#define FIT_NO 5
 
 
 char *get_theme_file();
@@ -37,7 +38,7 @@ void goto_page(int newpage);
 int get_cur_page();
 Epdf_Document *get_document();
 
-void render_cur_page();
+void render_cur_page(bool next);
 void prerender_next_page();
 void reset_cur_panning();
 #endif
