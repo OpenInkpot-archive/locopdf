@@ -775,6 +775,12 @@ void restore_global_settings(char *filename)
     }
 }
 
+static void
+usage()
+{
+    fprintf(stderr, "Usage: locopdf <pdf file>\n");
+}
+
 int main(int argc, char *argv[])
 {
     Ecore_Evas *ee;
@@ -782,6 +788,12 @@ int main(int argc, char *argv[])
     Evas_Object *bg,*o1,*o2;
 
     keys = keys_alloc("locopdf");
+
+    if(argc != 2)
+    {
+        usage();
+        return 1;
+    }
 
     /* initialize our libraries */
     evas_init();
