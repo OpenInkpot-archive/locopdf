@@ -28,6 +28,7 @@
 #include "locopdf.h"
 
 const char *FIT_STRINGS[] = { 		
+        "Fit Text Width",
 		"Fit Width",
 		"Fit Height",
 		"Best Fit",
@@ -159,7 +160,7 @@ void lefttrim_entryhandler(Evas *e, Evas_Object *obj,char *value)
         update_label(e,trimmingchoicebox,0,tempo);
         free(tempo);
         free(value);
-        render_cur_page();
+        render_cur_page(true);
         prerender_next_page();
     }
     
@@ -185,7 +186,7 @@ void righttrim_entryhandler(Evas *e, Evas_Object *obj,char *value)
         update_label(e,trimmingchoicebox,1,tempo);
         free(tempo);
         free(value);
-        render_cur_page();
+        render_cur_page(true);
         prerender_next_page();
     }
 }
@@ -210,7 +211,7 @@ void toptrim_entryhandler(Evas *e, Evas_Object *obj,char *value)
         update_label(e,trimmingchoicebox,2,tempo);
         free(tempo);
         free(value);
-        render_cur_page();
+        render_cur_page(true);
         prerender_next_page();
     }
 }
@@ -235,7 +236,7 @@ void bottomtrim_entryhandler(Evas *e, Evas_Object *obj,char *value)
         update_label(e,trimmingchoicebox,3,tempo);
         free(tempo);
         free(value);
-        render_cur_page();
+        render_cur_page(true);
         prerender_next_page();
     }
 }
@@ -259,7 +260,7 @@ void fitmode_choicehandler(Evas *e, Evas_Object *parent,int choice, bool lp)
         
         evas_object_focus_set(choicebox_get_parent(e,parent),1);
         fini_choicebox(e,parent);
-        render_cur_page();
+        render_cur_page(true);
         prerender_next_page();
     }
 }
@@ -267,11 +268,12 @@ void fitmode_choicehandler(Evas *e, Evas_Object *parent,int choice, bool lp)
 void FitModeDialog(Evas *e, Evas_Object *obj)
 {
 	const char *initchoices[] = { 		
-		"1. Fit Width",
-		"2. Fit Height",
-		"3. Best Fit",
-		"4. Stretch Fit",
-        "5. No Fit",
+        "1. Fit Text Width",
+		"2. Fit Width",
+		"3. Fit Height",
+		"4. Best Fit",
+		"5. Stretch Fit",
+        "6. No Fit",
 	};
 
     
@@ -281,9 +283,10 @@ void FitModeDialog(Evas *e, Evas_Object *obj)
 		"",
 		"",
         "",
+        "",
 	};
     
-	fitmodechoicebox=init_choicebox(e,initchoices, values, 5, fitmode_choicehandler, "Fit Mode Settings",obj,NULL);
+	fitmodechoicebox=init_choicebox(e,initchoices, values, 6, fitmode_choicehandler, "Fit Mode Settings",obj,NULL);
     
     int x,y,w,h;
     evas_object_geometry_get(fitmodechoicebox,&x,&y,&w,&h);
@@ -399,7 +402,7 @@ void preferences_choicehandler(Evas *e, Evas_Object *parent,int choice, bool lp)
     {
         set_antialias_mode(!get_antialias_mode());
         update_label(e,preferenceschoicebox,5,OFF_ON_STRINGS[get_antialias_mode()]);
-        render_cur_page();
+        render_cur_page(true);
         prerender_next_page();
     }
     else if(choice==6)
