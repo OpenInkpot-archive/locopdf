@@ -787,6 +787,11 @@ int main(int argc, char *argv[])
     
     Evas_Object *bg,*o1,*o2;
 
+    if(argc < 2) {
+        fprintf(stderr, "No input file specified.\n");
+        return 1;
+    }
+
     keys = keys_alloc("locopdf");
 
     if(argc != 2)
