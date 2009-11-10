@@ -852,9 +852,10 @@ int main(int argc, char *argv[])
     document = epdf_document_new (argv[1]);
     if (!document) {
     // manage error here
-        fprintf(stderr,"Error Opening Document");
-
+        fprintf(stderr,"Error Opening Document\n");
+        return 1;
     }
+
     numpages=epdf_document_page_count_get(document);
     page = epdf_page_new (document);
     if (!page) {
