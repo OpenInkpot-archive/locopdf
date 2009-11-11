@@ -35,6 +35,7 @@
 
 #include <Ecore.h>
 #include <Ecore_Evas.h>
+#include <Ecore_Con.h>
 #include <Ecore_File.h>
 #include <Edje.h>
 #include <Evas.h>
@@ -42,9 +43,13 @@
 
 #include <libkeys.h>
 
+#include <Ecore_Con.h>
 #include "dialogs.h"
 #include "locopdf.h"
 #include "database.h"
+
+#include <xcb/xcb.h>
+#include "info_export.h"
 
 #define REL_THEME "themes/themes_oitheme.edj"
 
@@ -59,6 +64,7 @@ Epdf_Document *document;
 Epdf_Page     *page;
 Ecore_List *pdf_index;
 char          *filename;
+int dbres;
 pthread_mutex_t pdf_renderer_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 int numpages;
@@ -776,6 +782,180 @@ void restore_global_settings(char *filename)
 }
 
 static void
+set_properties(Ecore_Evas *ee)
+{
+    Ecore_X_Window root = ((xcb_screen_t*)ecore_x_default_screen_get())->root;
+    Ecore_X_Window window = ecore_evas_software_x11_window_get(ee);
+
+    wprop_set_active_win_id(root, window);
+
+    wprop_set_string(window, "ACTIVE_DOC_AUTHOR", epdf_document_author_get(document));
+    char* buf;
+    asprintf(&buf, "%s - %s", epdf_document_title_get(document), epdf_document_subject_get(document));
+    wprop_set_string(window, "ACTIVE_DOC_TITLE", buf);
+    if(buf)
+        free(buf);
+    wprop_set_string(window, "ACTIVE_DOC_FILENAME", ecore_file_file_get(filename));
+    wprop_set_string(window, "ACTIVE_DOC_FILEPATH", ecore_file_dir_get(filename));
+}
+
+static bool
+open_file(const char* file)
+{
+    restore_global_settings((char*)file);
+
+    document = epdf_document_new (file);
+    if (!document) {
+    // manage error here
+        fprintf(stderr,"Error Opening Document\n");
+        return false;
+    }
+
+    numpages=epdf_document_page_count_get(document);
+    page = epdf_page_new (document);
+    if (!page) {
+    // manage error here
+        fprintf(stderr,"Error Processing Document");
+
+        return false;
+    }
+    curpdfobj=1;
+
+    filename = strdup(file);
+
+    pdf_index=epdf_index_new (document);
+
+    render_cur_page(true);
+    prerender_next_page();
+
+    return true;
+}
+
+static void
+close_file()
+{
+    ensure_thread_dead();
+
+    if(dbres!=(-1))
+    {
+        save_global_settings(filename);
+        Evas_Object *pdfobj;
+        if(curpdfobj==1)
+            pdfobj=evas_object_name_find(evas,"pdfobj1");
+        else
+            pdfobj=evas_object_name_find(evas,"pdfobj2");
+        int x,y,w,h;
+        evas_object_geometry_get(pdfobj,&x,&y,&w,&h);
+        set_setting_INT(filename,"current_x",x);
+        set_setting_INT(filename,"current_y",y);
+        set_setting_INT(filename,"antialias",get_antialias_mode());
+    }
+    epdf_index_delete(pdf_index);
+    epdf_page_delete (page);
+    epdf_document_delete (document);
+
+    free(filename);
+    filename = NULL;
+}
+
+typedef struct
+{
+    char* msg;
+    int size;
+} client_data_t;
+
+static int _client_add(void* param, int ev_type, void* ev)
+{
+    Ecore_Con_Event_Client_Add* e = ev;
+    client_data_t* msg = malloc(sizeof(client_data_t));
+    msg->msg = strdup("");
+    msg->size = 0;
+    ecore_con_client_data_set(e->client, msg);
+    return 0;
+}
+
+static int _client_del(void* param, int ev_type, void* ev)
+{
+    Ecore_Con_Event_Client_Del* e = ev;
+    client_data_t* msg = ecore_con_client_data_get(e->client);
+
+    /* Handle */
+
+    if(!msg->msg[0])
+    {
+        /* Skip it: ecore-con internal bug */
+    }
+    else if(msg->size < 1)
+    {
+        fprintf(stderr, "No filename was received\n");
+    }
+    else
+    {
+        Ecore_Evas* win = (Ecore_Evas*)param;
+
+        char* oldfile = strdup(filename);
+
+        close_file();
+
+        if(!open_file(msg->msg))
+            open_file(oldfile);
+
+        if(oldfile)
+            free(oldfile);
+
+        set_properties(win);
+
+        ecore_evas_show(win);
+        ecore_evas_raise(win);
+    }
+
+    free(msg->msg);
+    free(msg);
+    return 0;
+}
+
+static int _client_data(void* param, int ev_type, void* ev)
+{
+    Ecore_Con_Event_Client_Data* e = ev;
+    client_data_t* msg = ecore_con_client_data_get(e->client);
+    msg->msg = realloc(msg->msg, msg->size + e->size);
+    memcpy(msg->msg + msg->size, e->data, e->size);
+    msg->size += e->size;
+    return 0;
+}
+
+static bool check_running_instance(const char* file)
+{
+    if(!file)
+        return true;
+
+    Ecore_Con_Server* server
+        = ecore_con_server_add(ECORE_CON_LOCAL_USER, "locopdf-singleton", 0, NULL);
+
+    if(!server)
+    {
+        /* Somebody already listens there */
+        server = ecore_con_server_connect(ECORE_CON_LOCAL_USER,
+                                          "locopdf-singleton", 0, NULL);
+
+        if(!server)
+            return false;
+
+        char* buf = (char*)malloc(strlen(file) + 1);
+        strcpy(buf, file);
+        buf[strlen(file)] = '\0';
+        ecore_con_server_send(server, buf, strlen(file) + 1);
+        free(buf);
+        ecore_con_server_flush(server);
+        ecore_con_server_del(server);
+
+        return true;
+    }
+
+    return false;
+}
+
+static void
 usage()
 {
     fprintf(stderr, "Usage: locopdf <pdf file>\n");
@@ -792,13 +972,23 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    keys = keys_alloc("locopdf");
+    ecore_init();
+    ecore_con_init();
+
+    if(check_running_instance(argv[1]))
+    {
+        ecore_con_shutdown();
+        ecore_shutdown();
+        return 0;
+    }
+
 
     /* initialize our libraries */
     evas_init();
-    ecore_init();
     ecore_evas_init();
     edje_init();
+
+    keys = keys_alloc("locopdf");
 
     set_antialias_mode(true);
     /* setup database */
@@ -813,13 +1003,13 @@ int main(int argc, char *argv[])
     free(settingsdir);
     char *dbfile;
     asprintf(&dbfile,"%s/%s",homedir,".locopdf/files.db");
-    int dbres=init_database(dbfile);
+    dbres=init_database(dbfile);
     free(dbfile);
     if(dbres!=(-1))
         restore_global_settings(argv[1]);
+
     /* create our Ecore_Evas and show it */
     ee = ecore_evas_software_x11_new(0, 0, 0, 0, 600, 800);
-    
     
     ecore_evas_borderless_set(ee, 0);
     ecore_evas_shaped_set(ee, 0);
@@ -841,30 +1031,11 @@ int main(int argc, char *argv[])
     evas_object_focus_set(bg, 1);
     evas_object_event_callback_add(bg, EVAS_CALLBACK_KEY_UP, _key_handler, NULL);
     evas_object_show(bg);
-    
 
     /* mutex for epdf access */
     pthread_mutexattr_t   mta;
     pthread_mutex_init(&pdf_renderer_mutex, &mta);
     pthread_mutexattr_settype(&mta, PTHREAD_MUTEX_RECURSIVE);
-    
-    filename=argv[1];
-    document = epdf_document_new (argv[1]);
-    if (!document) {
-    // manage error here
-        fprintf(stderr,"Error Opening Document\n");
-        return 1;
-    }
-
-    numpages=epdf_document_page_count_get(document);
-    page = epdf_page_new (document);
-    if (!page) {
-    // manage error here
-        fprintf(stderr,"Error Processing Document");
-    }
-    curpdfobj=1;
-    
-    pdf_index=epdf_index_new (document);
     
     o2 = evas_object_image_add (evas);
     evas_object_move (o2, 0, 0);
@@ -872,15 +1043,6 @@ int main(int argc, char *argv[])
     //evas_object_show (o2);
 
     o1 = evas_object_image_add (evas);
-    
-
-    int init_x = 0;
-    int init_y = 0;
-    if(dbres != -1)
-    {
-        init_x = get_setting_INT(argv[1], "current_x");
-        init_y = get_setting_INT(argv[1], "current_y");
-    }
     evas_object_name_set(o1, "pdfobj1");
     evas_object_show (o1);
     if(dbres!=(-1))
@@ -890,43 +1052,30 @@ int main(int argc, char *argv[])
             set_antialias_mode(am);
     }
     
-    render_cur_page(true);
-    prerender_next_page();
+    if(!open_file(argv[1]))
+        return 1;
+
+    set_properties(ee);
     
+    ecore_event_handler_add(ECORE_CON_EVENT_CLIENT_ADD, _client_add, NULL);
+    ecore_event_handler_add(ECORE_CON_EVENT_CLIENT_DATA, _client_data, NULL);
+    ecore_event_handler_add(ECORE_CON_EVENT_CLIENT_DEL, _client_del, ee);
 
     /* start the main event loop */
     ecore_main_loop_begin();
-    
-    /* when the main event loop exits, shutdown our libraries */
-    if(dbres!=(-1))
-    {
-        save_global_settings(argv[1]);
-        Evas_Object *pdfobj;
-        if(curpdfobj==1)
-            pdfobj=evas_object_name_find(evas,"pdfobj1");
-        else
-            pdfobj=evas_object_name_find(evas,"pdfobj2"); 
-        int x,y,w,h;
-        evas_object_geometry_get(pdfobj,&x,&y,&w,&h);
-        set_setting_INT(argv[1],"current_x",x);
-        set_setting_INT(argv[1],"current_y",y);
-        set_setting_INT(argv[1],"antialias",get_antialias_mode());
-        fini_database();
-    }
+
+    close_file();
+
+    fini_database();
     evas_object_del (o1);
     evas_object_del (o2);
     evas_object_del (bg);
-    epdf_index_delete(pdf_index);
-    epdf_page_delete (page);
-    epdf_document_delete (document);
 
     pthread_mutex_destroy(&pdf_renderer_mutex);
     
-    
     edje_shutdown();
     ecore_evas_shutdown();
+    ecore_con_shutdown();
     ecore_shutdown();
     evas_shutdown();
-
-
 }
