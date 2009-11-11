@@ -3,7 +3,7 @@ Section: media
 Maintainer: Alexander Kerner <lunohod@openinkpot.org>
 Uploaders: Mikhail Gusarov <dottedmag@dottedmag.net>
 XCS-Cross-Host-Build-Depends: debhelper (>= 7), autoconf, automake, libtool, pkg-config
-XCS-Cross-Build-Depends: libevas-dev, libecore-dev, libedje-dev, libemupdf-dev, libsqlite3-dev, libkeys-dev
+XCS-Cross-Build-Depends: libevas-dev, libecore-dev, libedje-dev, libemupdf-dev, libsqlite3-dev, libkeys-dev, libxcb-atom1-dev
 Priority: optional
 Standards-Version: 3.8.3
 
