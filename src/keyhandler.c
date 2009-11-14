@@ -27,52 +27,51 @@
 #include "keyhandler.h"
 
 /* FIXME: HACK */
-static void _key_handler(void *data, Evas *evas, Evas_Object *obj, void *event_info)
+static void
+_key_handler(void *data, Evas * evas, Evas_Object * obj, void *event_info)
 {
-    Evas_Event_Key_Up* e = (Evas_Event_Key_Up*)event_info;
-    key_handler_info_t* handler_info = (key_handler_info_t*)data;
+    Evas_Event_Key_Up *e = (Evas_Event_Key_Up *) event_info;
+    key_handler_info_t *handler_info = (key_handler_info_t *) data;
 
-    const char* k = e->keyname;
+    const char *k = e->keyname;
 #define HANDLE_ITEM(h, params, lp) { if(handler_info->h) (*handler_info->h)(evas,obj,params, lp);}
 #define HANDLE_KEY(h) {if(handler_info->h) (*handler_info->h)(evas,obj);}
-    if(!strcmp(k, "Return")) {
+    if (!strcmp(k, "Return")) {
         HANDLE_KEY(ok_handler)
-    }
-    else if(!strcmp(k, "Escape"))    HANDLE_KEY(esc_handler)
+    } else if (!strcmp(k, "Escape"))
+        HANDLE_KEY(esc_handler)
     else if (isdigit(k[0]) && !k[1]) {
-		bool lp = false;
-		//if(e->modifiers & EWL_KEY_MODIFIER_ALT)
-        if(evas_key_modifier_is_set(e->modifiers, "Alt"))
-			lp = true;
-		HANDLE_ITEM(item_handler, k[0]-'0', lp)
-	}
-    else if (k[0]=='K' && k[1]=='P')
-    {
+        bool lp = false;
+        //if(e->modifiers & EWL_KEY_MODIFIER_ALT)
+        if (evas_key_modifier_is_set(e->modifiers, "Alt"))
+            lp = true;
+        HANDLE_ITEM(item_handler, k[0] - '0', lp)
+    } else if (k[0] == 'K' && k[1] == 'P') {
         if (isdigit(k[3]) && !k[4]) {
             bool lp = false;
             //if(e->modifiers & EWL_KEY_MODIFIER_ALT)
-            if(evas_key_modifier_is_set(e->modifiers, "Alt"))
-            	lp = true;
-            HANDLE_ITEM(item_handler, k[3]-'0', lp)
-        }
-        else if (!strcmp(k, "KP_Add"))        HANDLE_KEY(plus_handler)
-        else if (!strcmp(k, "KP_Subtract"))   HANDLE_KEY(minus_handler)
-            
-    }
-    else if (!strcmp(k,"Up")) {
+            if (evas_key_modifier_is_set(e->modifiers, "Alt"))
+                lp = true;
+            HANDLE_ITEM(item_handler, k[3] - '0', lp)
+        } else if (!strcmp(k, "KP_Add"))
+            HANDLE_KEY(plus_handler)
+        else if (!strcmp(k, "KP_Subtract"))
+            HANDLE_KEY(minus_handler)
+    } else if (!strcmp(k, "Up"))
         HANDLE_KEY(nav_right_handler)
-    }
-    else if (!strcmp(k, "Down")) {
+    else if (!strcmp(k, "Down"))
         HANDLE_KEY(nav_left_handler)
-    }
-    else if (!strcmp(k, "Left"))     HANDLE_KEY(nav_left_handler)
-    else if (!strcmp(k, "Right"))    HANDLE_KEY(nav_right_handler)
-    else if (!strcmp(k, "F2"))       HANDLE_KEY(nav_menubtn_handler)
-    
+    else if (!strcmp(k, "Left"))
+        HANDLE_KEY(nav_left_handler)
+    else if (!strcmp(k, "Right"))
+        HANDLE_KEY(nav_right_handler)
+    else if (!strcmp(k, "F2"))
+        HANDLE_KEY(nav_menubtn_handler)
 }
 
-void set_key_handler(Evas_Object* obj, key_handler_info_t* handler_info)
+void
+set_key_handler(Evas_Object * obj, key_handler_info_t * handler_info)
 {
-    evas_object_event_callback_add(obj,EVAS_CALLBACK_KEY_UP,_key_handler,handler_info);
+    evas_object_event_callback_add(obj, EVAS_CALLBACK_KEY_UP,
+            _key_handler, handler_info);
 }
-

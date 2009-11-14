@@ -15,10 +15,10 @@ void commit_transaction();
 
 int get_file_record_status(char *filename);
 int update_file_mod_time(char *filename);
-void set_setting(char *filename,char *settingname,char *value);
-void set_setting_INT(char *filename,char *settingname,int value);
-void set_setting_DOUBLE(char *filename,char *settingname,double value);
-char *get_setting(char *filename,char *settingname);
-int get_setting_INT(char *filename,char *settingname);
-double get_setting_DOUBLE(char *filename,char *settingname);
+void set_setting(char *filename, char *settingname, char *value);
+void set_setting_INT(char *filename, char *settingname, int value);
+void set_setting_DOUBLE(char *filename, char *settingname, double value);
+char *get_setting(char *filename, char *settingname);
+int get_setting_INT(char *filename, char *settingname);
+double get_setting_DOUBLE(char *filename, char *settingname);
 #endif

@@ -53,36 +53,36 @@
 
 /* Uzhosnakh */
 
-static keys_t* keys;
+static keys_t *keys;
 
 pthread_t thread;
 
 Evas *evas;
 Epdf_Document *document;
-Epdf_Page     *page;
+Epdf_Page *page;
 Ecore_List *pdf_index;
-char          *filename;
+char *filename;
 int dbres;
 pthread_mutex_t pdf_renderer_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 int numpages;
-int curpdfobj=1;
-int prerendering=0;
-int fitmode=FIT_TEXT_WIDTH;
-double zoom=1.0;
-double zoominc=0.1;
-double hpaninc=0.5;
-double vpaninc=0.9;
+int curpdfobj = 1;
+int prerendering = 0;
+int fitmode = FIT_TEXT_WIDTH;
+double zoom = 1.0;
+double zoominc = 0.1;
+double hpaninc = 0.5;
+double vpaninc = 0.9;
 
-int lefttrim=0;
-int righttrim=0;
-int toptrim=0;
-int bottomtrim=0;
+int lefttrim = 0;
+int righttrim = 0;
+int toptrim = 0;
+int bottomtrim = 0;
 
 int panx = 0;
 int pany = 0;
-int winwidth=600;
-int winheight=800;
+int winwidth = 600;
+int winheight = 800;
 
 typedef struct {
     int page;
@@ -102,21 +102,19 @@ typedef enum {
     PREV,
     NEXT,
     RIGHT,
-    LEFT
-} tile_orientation;
+    LEFT,
+} tile_orientation_t;
 
 tile_t cur_tile, next_tile;
 
 static void render_tile(tile_t tile);
 static void flip_pages();
 
-tile_t get_tile(tile_t curtile, tile_orientation orient)
+static tile_t
+get_tile(tile_t curtile, tile_orientation_t orient)
 {
     int x, y, cwidth, cheight, width, height;
-    int _lefttrim = 0,
-        _righttrim = 0,
-        _toptrim = 0,
-        _bottomtrim = 0;
+    int _lefttrim = 0, _righttrim = 0, _toptrim = 0, _bottomtrim = 0;
 
     tile_t tile = {
         .page = -1,
@@ -133,21 +131,21 @@ tile_t get_tile(tile_t curtile, tile_orientation orient)
 
     tile.page = -1;
 
-    if(orient == PREV) {
-        if(curtile.w > 0 && curtile.y > 0) {
+    if (orient == PREV) {
+        if (curtile.w > 0 && curtile.y > 0) {
             tile = curtile;
             tile.y -= (tile.h * vpaninc);
-            if(tile.y < 0)
+            if (tile.y < 0)
                 tile.y = 0;
 
             return tile;
         }
     }
 
-    if(orient == NEXT) {
-        if(curtile.w > 0 && curtile.y + curtile.h < curtile.ph) {
+    if (orient == NEXT) {
+        if (curtile.w > 0 && curtile.y + curtile.h < curtile.ph) {
             tile = curtile;
-            if(0 && tile.y + tile.h * vpaninc > tile.ph - tile.h)
+            if (0 && tile.y + tile.h * vpaninc > tile.ph - tile.h)
                 tile.y = tile.ph - tile.h;
             else
                 tile.y += (tile.h * vpaninc);
@@ -156,21 +154,21 @@ tile_t get_tile(tile_t curtile, tile_orientation orient)
         }
     }
 
-    if(orient == RIGHT) {
-        if(curtile.w > 0 && curtile.x + curtile.w < curtile.pw) {
+    if (orient == RIGHT) {
+        if (curtile.w > 0 && curtile.x + curtile.w < curtile.pw) {
             tile = curtile;
             tile.x += (tile.w * hpaninc);
-            if(tile.x + tile.w > tile.pw)
+            if (tile.x + tile.w > tile.pw)
                 tile.x = tile.pw - tile.w;
         }
         return tile;
     }
 
-    if(orient == LEFT) {
-        if(curtile.w > 0 && curtile.x > 0) {
+    if (orient == LEFT) {
+        if (curtile.w > 0 && curtile.x > 0) {
             tile = curtile;
             tile.x -= (tile.w * hpaninc);
-            if(tile.x < 0)
+            if (tile.x < 0)
                 tile.x = 0;
         }
         return tile;
@@ -178,27 +176,28 @@ tile_t get_tile(tile_t curtile, tile_orientation orient)
 
     do {
 
-        if(orient == PREV)
+        if (orient == PREV)
             curtile.page--;
-        if(orient == NEXT)
+        if (orient == NEXT)
             curtile.page++;
 
-        if(orient == PREV && curtile.page < 0)
+        if (orient == PREV && curtile.page < 0)
             return tile;
 
-        if((orient == CUR || orient == NEXT) && curtile.page > (numpages - 1))
+        if ((orient == CUR || orient == NEXT)
+            && curtile.page > (numpages - 1))
             return tile;
 
         epdf_page_page_set(page, curtile.page);
         epdf_page_size_get(page, &width, &height);
         epdf_page_content_geometry_get(page, &x, &y, &cwidth, &cheight);
 
-        if(orient == CUR && (cwidth == 0 || cheight == 0))
+        if (orient == CUR && (cwidth == 0 || cheight == 0))
             curtile.page++;
 
-    } while(cwidth == 0 || cheight == 0);
+    } while (cwidth == 0 || cheight == 0);
 
-    if(fitmode == FIT_TEXT_WIDTH) {
+    if (fitmode == FIT_TEXT_WIDTH) {
         _lefttrim = x - 10;
         _righttrim = width - x - cwidth - 5;
         _bottomtrim = y - 10;
@@ -212,84 +211,78 @@ tile_t get_tile(tile_t curtile, tile_orientation orient)
     tile.w = curtile.w;
 
     // fix it!
-    if(!tile.w)
+    if (!tile.w)
         tile.w = get_win_width();
 
     // fix it!
-    if(!tile.h)
+    if (!tile.h)
         tile.h = get_win_height();
 
-    double fitwidthzoom = ((double)tile.w)/((double)(width-_lefttrim-_righttrim))*zoom;
-    double fitheightzoom = ((double)tile.h)/((double)(height-_toptrim-_bottomtrim))*zoom;
+    double fitwidthzoom =
+        ((double) tile.w) / ((double) (width - _lefttrim - _righttrim)) *
+        zoom;
+    double fitheightzoom =
+        ((double) tile.h) / ((double) (height - _toptrim - _bottomtrim)) *
+        zoom;
 
     double scalex;
     double scaley;
 
-    if(fitmode==FIT_WIDTH || fitmode == FIT_TEXT_WIDTH)
-    {
-        scalex=fitwidthzoom;
-        scaley=fitwidthzoom;
-    }
-    else if(fitmode==FIT_HEIGHT)
-    {
-        scalex=fitheightzoom;
-        scaley=fitheightzoom;
-    }
-    else if(fitmode==FIT_BEST)
-    {
-        if(fitwidthzoom<=fitheightzoom)
-        {
-            scalex=fitwidthzoom;
-            scaley=fitwidthzoom;
-        }
-        else
-        {
-            scalex=fitheightzoom;
-            scaley=fitheightzoom;
+    if (fitmode == FIT_WIDTH || fitmode == FIT_TEXT_WIDTH) {
+        scalex = fitwidthzoom;
+        scaley = fitwidthzoom;
+    } else if (fitmode == FIT_HEIGHT) {
+        scalex = fitheightzoom;
+        scaley = fitheightzoom;
+    } else if (fitmode == FIT_BEST) {
+        if (fitwidthzoom <= fitheightzoom) {
+            scalex = fitwidthzoom;
+            scaley = fitwidthzoom;
+        } else {
+            scalex = fitheightzoom;
+            scaley = fitheightzoom;
         }
 
-    }
-    else if(fitmode==FIT_STRETCH)
-    {
-        scalex=fitwidthzoom;
-        scaley=fitheightzoom;
+    } else if (fitmode == FIT_STRETCH) {
+        scalex = fitwidthzoom;
+        scaley = fitheightzoom;
 
-    }
-    else if(fitmode==FIT_NO)
-    {
-        scalex=1.0;
-        scaley=1.0;
+    } else if (fitmode == FIT_NO) {
+        scalex = 1.0;
+        scaley = 1.0;
 
-    }
-    else
-    {
-        err(1, "Unknown fitmode passed to background renderer: %d", fitmode);
+    } else {
+        err(1, "Unknown fitmode passed to background renderer: %d",
+            fitmode);
     }
 
     tile.pscale = scalex;
 
-    if(!_lefttrim && !_righttrim && !_toptrim && !_bottomtrim) {
+    if (!_lefttrim && !_righttrim && !_toptrim && !_bottomtrim) {
         tile.px = 0;
         tile.py = 0;
         tile.pw = width;
         tile.ph = height;
     } else {
-        tile.px = (int)(((double)_lefttrim)*scalex);
-        tile.py = (int)(((double)_toptrim)*scaley);
-        tile.pw = (int)(((double)(width-_lefttrim-_righttrim))*scalex);
-        tile.ph = (int)(((double)(height-_toptrim-_bottomtrim))*scaley);
+        tile.px = (int) (((double) _lefttrim) * scalex);
+        tile.py = (int) (((double) _toptrim) * scaley);
+        tile.pw =
+            (int) (((double) (width - _lefttrim - _righttrim)) * scalex);
+        tile.ph =
+            (int) (((double) (height - _toptrim - _bottomtrim)) * scaley);
     }
 
-    if(orient == PREV) {
+    if (orient == PREV) {
         tile.y = tile.ph - tile.h;
-        if(tile.y < 0)
+        if (tile.y < 0)
             tile.y = 0;
     }
 
     return tile;
 }
 
-static void main_win_resize_handler(Ecore_Evas* main_win)
+static void
+main_win_resize_handler(Ecore_Evas * main_win)
 {
     int w, h;
     Evas *canvas = ecore_evas_get(main_win);
@@ -307,141 +300,168 @@ static void main_win_resize_handler(Ecore_Evas* main_win)
     render_cur_page();
 }
 
-static void main_win_delete_handler(Ecore_Evas* main_win)
+static void
+main_win_delete_handler(Ecore_Evas * main_win)
 {
     ecore_main_loop_quit();
 }
 
-char *get_theme_file()
+char *
+get_theme_file()
 {
-	char *rel_theme;
-	asprintf(&rel_theme, "%s/%s", "/usr/share/locopdf", REL_THEME);
-	return rel_theme;
+    char *rel_theme;
+    asprintf(&rel_theme, "%s/%s", "/usr/share/locopdf", REL_THEME);
+    return rel_theme;
 }
 
-int get_win_width()
+int
+get_win_width()
 {
     return winwidth;
 }
 
-int get_win_height()
+int
+get_win_height()
 {
     return winheight;
 }
 
-double get_zoom_inc()
+double
+get_zoom_inc()
 {
     return zoominc;
 }
 
-void set_zoom_inc(double newzoominc)
+void
+set_zoom_inc(double newzoominc)
 {
-    zoominc=newzoominc;
+    zoominc = newzoominc;
 }
 
-double get_hpan_inc()
+double
+get_hpan_inc()
 {
     return hpaninc;
 }
 
-void set_hpan_inc(double newhpaninc)
+void
+set_hpan_inc(double newhpaninc)
 {
-    hpaninc=newhpaninc;
+    hpaninc = newhpaninc;
 }
 
-double get_vpan_inc()
+double
+get_vpan_inc()
 {
     return vpaninc;
 }
 
-void set_vpan_inc(double newvpaninc)
+void
+set_vpan_inc(double newvpaninc)
 {
-    vpaninc=newvpaninc;
+    vpaninc = newvpaninc;
 }
 
-int get_lefttrim()
+int
+get_lefttrim()
 {
     return lefttrim;
 }
 
-void set_lefttrim(int newlefttrim)
+void
+set_lefttrim(int newlefttrim)
 {
-    lefttrim=newlefttrim;
+    lefttrim = newlefttrim;
 }
 
-int get_righttrim()
+int
+get_righttrim()
 {
     return righttrim;
 }
 
-void set_righttrim(int newrighttrim)
+void
+set_righttrim(int newrighttrim)
 {
-    righttrim=newrighttrim;
+    righttrim = newrighttrim;
 }
 
-int get_toptrim()
+int
+get_toptrim()
 {
     return toptrim;
 }
 
-void set_toptrim(int newtoptrim)
+void
+set_toptrim(int newtoptrim)
 {
-    toptrim=newtoptrim;
+    toptrim = newtoptrim;
 }
 
-int get_bottomtrim()
+int
+get_bottomtrim()
 {
     return bottomtrim;
 }
 
-void set_bottomtrim(int newbottomtrim)
+void
+set_bottomtrim(int newbottomtrim)
 {
-    bottomtrim=newbottomtrim;
+    bottomtrim = newbottomtrim;
 }
 
-int get_fit_mode()
+int
+get_fit_mode()
 {
     return fitmode;
 }
 
-void set_fit_mode(int newfitmode)
+void
+set_fit_mode(int newfitmode)
 {
-    fitmode=newfitmode;
+    fitmode = newfitmode;
 }
 
-int get_antialias_mode()
+int
+get_antialias_mode()
 {
     return epdf_fonts_antialias_get() && epdf_lines_antialias_get();
 }
 
-void set_antialias_mode(int newantialiasmode)
+void
+set_antialias_mode(int newantialiasmode)
 {
     epdf_fonts_antialias_set(newantialiasmode ? 1 : 0);
     epdf_lines_antialias_set(newantialiasmode ? 1 : 0);
 }
 
-int get_num_pages()
+int
+get_num_pages()
 {
     return numpages;
 }
 
-void goto_page(int newpage)
+void
+goto_page(int newpage)
 {
     cur_tile.page = newpage;
     render_cur_page();
 }
 
-int get_cur_page()
+int
+get_cur_page()
 {
     return cur_tile.page;
 }
 
-Epdf_Document *get_document()
+Epdf_Document *
+get_document()
 {
     return document;
 }
 
-void render_cur_page()
+void
+render_cur_page()
 {
     pthread_mutex_lock(&pdf_renderer_mutex);
     cur_tile = get_tile(cur_tile, CUR);
@@ -452,36 +472,36 @@ void render_cur_page()
     prerender_next_page();
 }
 
-static void render_tile(tile_t tile)
+static void
+render_tile(tile_t tile)
 {
-    if(tile.page < 0 || tile.w < 0 || tile.h < 0)
+    if (tile.page < 0 || tile.w < 0 || tile.h < 0)
         return;
 
     Evas_Object *pdfobj;
 
-    if(curpdfobj==1)
-        pdfobj=evas_object_name_find(evas,"pdfobj2");
+    if (curpdfobj == 1)
+        pdfobj = evas_object_name_find(evas, "pdfobj2");
     else
-        pdfobj=evas_object_name_find(evas,"pdfobj1");
+        pdfobj = evas_object_name_find(evas, "pdfobj1");
 
-    if(epdf_page_page_get(page) != tile.page)
+    if (epdf_page_page_get(page) != tile.page)
         epdf_page_page_set(page, tile.page);
     epdf_page_scale_set(page, tile.pscale, tile.pscale);
 
     epdf_page_render_slice(page,
-            pdfobj,
-            tile.px + tile.x,
-            tile.py + tile.y,
-            tile.w,
-            tile.h);
+                           pdfobj,
+                           tile.px + tile.x,
+                           tile.py + tile.y, tile.w, tile.h);
 }
 
-void *thread_func(void *vptr_args)
+void *
+thread_func(void *vptr_args)
 {
     pthread_mutex_lock(&pdf_renderer_mutex);
 
     next_tile = get_tile(cur_tile, NEXT);
-    if(next_tile.page < 0) {
+    if (next_tile.page < 0) {
         pthread_mutex_unlock(&pdf_renderer_mutex);
         return NULL;
     }
@@ -492,54 +512,59 @@ void *thread_func(void *vptr_args)
     return NULL;
 }
 
-int are_legal_coords(int x1,int y1,int x2,int y2)
+int
+are_legal_coords(int x1, int y1, int x2, int y2)
 {
 
-    int xs_in_range=((x1>0&&x1<get_win_width())||(x2>0&&x2<get_win_width()));
-    int ys_in_range=((y1>0&&y1<get_win_height())||(y2>0&&y2<get_win_height()));
-    int xs_opposite=(x1<=0&&x2>=get_win_width());
-    int ys_opposite=(y1<=0&&y2>=get_win_height());
-    if((ys_in_range && xs_in_range) || (ys_in_range&& xs_opposite) || (xs_in_range && ys_opposite) || (xs_opposite && ys_opposite))
+    int xs_in_range = ((x1 > 0 && x1 < get_win_width())
+                       || (x2 > 0 && x2 < get_win_width()));
+    int ys_in_range = ((y1 > 0 && y1 < get_win_height())
+                       || (y2 > 0 && y2 < get_win_height()));
+    int xs_opposite = (x1 <= 0 && x2 >= get_win_width());
+    int ys_opposite = (y1 <= 0 && y2 >= get_win_height());
+    if ((ys_in_range && xs_in_range) || (ys_in_range && xs_opposite)
+        || (xs_in_range && ys_opposite) || (xs_opposite && ys_opposite))
         return 1;
     return 0;
 }
 
-void ensure_thread_dead()
+void
+ensure_thread_dead()
 {
-    if(prerendering)
+    if (prerendering)
         pthread_join(thread, NULL);
-    prerendering=0;
+    prerendering = 0;
 }
 
-void prerender_next_page()
+void
+prerender_next_page()
 {
     ensure_thread_dead();
-    prerendering=1;
+    prerendering = 1;
     pthread_create(&thread, NULL, thread_func, NULL);
 }
 
-static void flip_pages()
+static void
+flip_pages()
 {
-    Evas_Object *active,*inactive;
-    if(curpdfobj==1)
-    {
-        active=evas_object_name_find(evas,"pdfobj1");
-        inactive=evas_object_name_find(evas,"pdfobj2");
-        curpdfobj=2;
-    }
-    else
-    {
-        active=evas_object_name_find(evas,"pdfobj2");
-        inactive=evas_object_name_find(evas,"pdfobj1");
-        curpdfobj=1;
+    Evas_Object *active, *inactive;
+    if (curpdfobj == 1) {
+        active = evas_object_name_find(evas, "pdfobj1");
+        inactive = evas_object_name_find(evas, "pdfobj2");
+        curpdfobj = 2;
+    } else {
+        active = evas_object_name_find(evas, "pdfobj2");
+        inactive = evas_object_name_find(evas, "pdfobj1");
+        curpdfobj = 1;
     }
     evas_object_hide(active);
     evas_object_show(inactive);
 }
 
-static void next_page()
+static void
+next_page()
 {
-    if(next_tile.page < 0)
+    if (next_tile.page < 0)
         return;
     cur_tile = next_tile;
     ensure_thread_dead();
@@ -547,11 +572,12 @@ static void next_page()
     prerender_next_page();
 }
 
-static void prev_page()
+static void
+prev_page()
 {
     pthread_mutex_lock(&pdf_renderer_mutex);
     tile_t t = get_tile(cur_tile, PREV);
-    if(t.page < 0) {
+    if (t.page < 0) {
         pthread_mutex_unlock(&pdf_renderer_mutex);
         return;
     }
@@ -562,11 +588,12 @@ static void prev_page()
     pthread_mutex_unlock(&pdf_renderer_mutex);
 }
 
-static void pan_left()
+static void
+pan_left()
 {
     pthread_mutex_lock(&pdf_renderer_mutex);
     tile_t t = get_tile(cur_tile, LEFT);
-    if(t.page < 0) {
+    if (t.page < 0) {
         pthread_mutex_unlock(&pdf_renderer_mutex);
         return;
     }
@@ -578,11 +605,12 @@ static void pan_left()
     prerender_next_page();
 }
 
-static void pan_right()
+static void
+pan_right()
 {
     pthread_mutex_lock(&pdf_renderer_mutex);
     tile_t t = get_tile(cur_tile, RIGHT);
-    if(t.page < 0) {
+    if (t.page < 0) {
         pthread_mutex_unlock(&pdf_renderer_mutex);
         return;
     }
@@ -599,49 +627,55 @@ static void pan_right()
 
 /* Main key handler */
 
-static void _quit()
+static void
+_quit()
 {
     ecore_main_loop_quit();
 }
 
-static void _settings(Evas* canvas)
+static void
+_settings(Evas * canvas)
 {
-    Evas_Object* bgobj = evas_object_name_find(canvas, "background");
+    Evas_Object *bgobj = evas_object_name_find(canvas, "background");
     PreferencesDialog(evas, bgobj);
 }
 
-static void _zoom_in(Evas* canvas)
+static void
+_zoom_in(Evas * canvas)
 {
     zoom += zoominc;
-    if(zoom > 5.0)
+    if (zoom > 5.0)
         zoom = 5.0;
     render_cur_page();
 }
 
-static void _zoom_out(Evas* canvas)
+static void
+_zoom_out(Evas * canvas)
 {
     zoom -= zoominc;
-    if(zoom < 0.2)
+    if (zoom < 0.2)
         zoom = 0.2;
     render_cur_page();
 }
 
-static void _go_to_page(Evas* canvas)
+static void
+_go_to_page(Evas * canvas)
 {
-    Evas_Object* bgobj = evas_object_name_find(canvas, "background");
+    Evas_Object *bgobj = evas_object_name_find(canvas, "background");
     GotoPageEntry(canvas, bgobj);
 }
 
-static void _toc(Evas* canvas)
+static void
+_toc(Evas * canvas)
 {
-    if(pdf_index)
-    {
-        Evas_Object* bgobj = evas_object_name_find(canvas, "background");
+    if (pdf_index) {
+        Evas_Object *bgobj = evas_object_name_find(canvas, "background");
         TOCDialog(canvas, bgobj, pdf_index);
     }
 }
 
-void reset_zoom_and_pan()
+void
+reset_zoom_and_pan()
 {
     zoom = 1.0;
     cur_tile.y = 0;
@@ -649,143 +683,150 @@ void reset_zoom_and_pan()
     render_cur_page();
 }
 
-static void _key_handler(void* data, Evas* canvas, Evas_Object* obj,
-                         void* event_info)
+static void
+_key_handler(void *data, Evas * canvas, Evas_Object * obj,
+             void *event_info)
 {
-    Evas_Event_Key_Up* e = (Evas_Event_Key_Up*)event_info;
-    const char* action = keys_lookup_by_event(keys, "main", e);
-    if(!action) return;
+    Evas_Event_Key_Up *e = (Evas_Event_Key_Up *) event_info;
+    const char *action = keys_lookup_by_event(keys, "main", e);
+    if (!action)
+        return;
 
-    if(!strcmp(action, "Quit"))
+    if (!strcmp(action, "Quit"))
         _quit();
-    else if(!strcmp(action, "Settings"))
+    else if (!strcmp(action, "Settings"))
         _settings(canvas);
-    else if(!strcmp(action, "PageUp") || !strcmp(action, "PanUp"))
+    else if (!strcmp(action, "PageUp") || !strcmp(action, "PanUp"))
         prev_page();
-    else if(!strcmp(action, "PageDown") || !strcmp(action, "PanDown"))
+    else if (!strcmp(action, "PageDown") || !strcmp(action, "PanDown"))
         next_page();
-    else if(!strcmp(action, "ZoomIn"))
+    else if (!strcmp(action, "ZoomIn"))
         _zoom_in(canvas);
-    else if(!strcmp(action, "ZoomOut"))
+    else if (!strcmp(action, "ZoomOut"))
         _zoom_out(canvas);
-    else if(!strcmp(action, "GoToPage"))
+    else if (!strcmp(action, "GoToPage"))
         _go_to_page(canvas);
-    else if(!strcmp(action, "PanLeft"))
+    else if (!strcmp(action, "PanLeft"))
         pan_left();
-    else if(!strcmp(action, "PanRight"))
+    else if (!strcmp(action, "PanRight"))
         pan_right();
-    else if(!strcmp(action, "ToC"))
+    else if (!strcmp(action, "ToC"))
         _toc(canvas);
-    else if(!strcmp(action, "ResetView"))
+    else if (!strcmp(action, "ResetView"))
         reset_zoom_and_pan();
 }
 
-void save_global_settings(char *filename)
+void
+save_global_settings(char *filename)
 {
     begin_transaction();
-    set_setting_INT(filename,"current_page",cur_tile.page);
-    set_setting_DOUBLE(filename,"zoom_increment",zoominc);
-    set_setting_DOUBLE(filename,"current_zoom",zoom);
-    set_setting_DOUBLE(filename,"h_pan_increment",hpaninc);
-    set_setting_DOUBLE(filename,"v_pan_increment",vpaninc);
+    set_setting_INT(filename, "current_page", cur_tile.page);
+    set_setting_DOUBLE(filename, "zoom_increment", zoominc);
+    set_setting_DOUBLE(filename, "current_zoom", zoom);
+    set_setting_DOUBLE(filename, "h_pan_increment", hpaninc);
+    set_setting_DOUBLE(filename, "v_pan_increment", vpaninc);
 
     /*
-    set_setting_INT(filename,"left_trim",lefttrim);
-    set_setting_INT(filename,"right_trim",righttrim);
-    set_setting_INT(filename,"top_trim",toptrim);
-    set_setting_INT(filename,"bottom_trim",bottomtrim);
-    */
-    set_setting_INT(filename,"fit_mode",fitmode);
+       set_setting_INT(filename,"left_trim",lefttrim);
+       set_setting_INT(filename,"right_trim",righttrim);
+       set_setting_INT(filename,"top_trim",toptrim);
+       set_setting_INT(filename,"bottom_trim",bottomtrim);
+     */
+    set_setting_INT(filename, "fit_mode", fitmode);
     commit_transaction();
 }
-void restore_global_settings(char *filename)
-{
-    int temp11; //,temp12,temp13,temp14;
-    double temp21,temp22;
-    temp11=get_setting_INT(filename,"current_page");
-    if(temp11>=0)
-        cur_tile.page = (int)temp11;
 
-    temp21=get_setting_DOUBLE(filename,"zoom_increment");
-    temp22=get_setting_DOUBLE(filename,"current_zoom");
-    if(temp21>0 && temp22>0)
-    {
-        zoominc=temp21;
-        zoom=temp22;
+void
+restore_global_settings(char *filename)
+{
+    int temp11;                 //,temp12,temp13,temp14;
+    double temp21, temp22;
+    temp11 = get_setting_INT(filename, "current_page");
+    if (temp11 >= 0)
+        cur_tile.page = (int) temp11;
+
+    temp21 = get_setting_DOUBLE(filename, "zoom_increment");
+    temp22 = get_setting_DOUBLE(filename, "current_zoom");
+    if (temp21 > 0 && temp22 > 0) {
+        zoominc = temp21;
+        zoom = temp22;
     }
-    temp21=get_setting_DOUBLE(filename,"h_pan_increment");
-    temp22=get_setting_DOUBLE(filename,"v_pan_increment");
-    if(temp21>0 && temp22>0)
-    {
-        hpaninc=temp21;
-        vpaninc=temp22;
+    temp21 = get_setting_DOUBLE(filename, "h_pan_increment");
+    temp22 = get_setting_DOUBLE(filename, "v_pan_increment");
+    if (temp21 > 0 && temp22 > 0) {
+        hpaninc = temp21;
+        vpaninc = temp22;
 
     }
 
     /*
-    temp11=get_setting_INT(filename,"left_trim");
-    temp12=get_setting_INT(filename,"right_trim");
-    temp13=get_setting_INT(filename,"top_trim");
-    temp14=get_setting_INT(filename,"bottom_trim");
-    if(temp11>=0 && temp12>=0 && temp13>=0 && temp14>=0)
-    {
-        lefttrim=temp11;
-        righttrim=temp12;
-        toptrim=temp13;
-        bottomtrim=temp14;
+       temp11=get_setting_INT(filename,"left_trim");
+       temp12=get_setting_INT(filename,"right_trim");
+       temp13=get_setting_INT(filename,"top_trim");
+       temp14=get_setting_INT(filename,"bottom_trim");
+       if(temp11>=0 && temp12>=0 && temp13>=0 && temp14>=0)
+       {
+       lefttrim=temp11;
+       righttrim=temp12;
+       toptrim=temp13;
+       bottomtrim=temp14;
 
-    }
-    */
-    temp11=get_setting_INT(filename,"fit_mode");
-    if(temp11>=0)
-    {
-        fitmode=temp11;
+       }
+     */
+    temp11 = get_setting_INT(filename, "fit_mode");
+    if (temp11 >= 0) {
+        fitmode = temp11;
     }
 }
 
 static void
-set_properties(Ecore_Evas *ee)
+set_properties(Ecore_Evas * ee)
 {
-    Ecore_X_Window root = ((xcb_screen_t*)ecore_x_default_screen_get())->root;
+    Ecore_X_Window root =
+        ((xcb_screen_t *) ecore_x_default_screen_get())->root;
     Ecore_X_Window window = ecore_evas_software_x11_window_get(ee);
 
     wprop_set_active_win_id(root, window);
 
-    wprop_set_string(window, "ACTIVE_DOC_AUTHOR", epdf_document_author_get(document));
-    char* buf;
-    asprintf(&buf, "%s - %s", epdf_document_title_get(document), epdf_document_subject_get(document));
+    wprop_set_string(window, "ACTIVE_DOC_AUTHOR",
+                     epdf_document_author_get(document));
+    char *buf;
+    asprintf(&buf, "%s - %s", epdf_document_title_get(document),
+             epdf_document_subject_get(document));
     wprop_set_string(window, "ACTIVE_DOC_TITLE", buf);
-    if(buf)
+    if (buf)
         free(buf);
-    wprop_set_string(window, "ACTIVE_DOC_FILENAME", ecore_file_file_get(filename));
-    wprop_set_string(window, "ACTIVE_DOC_FILEPATH", ecore_file_dir_get(filename));
+    wprop_set_string(window, "ACTIVE_DOC_FILENAME",
+                     ecore_file_file_get(filename));
+    wprop_set_string(window, "ACTIVE_DOC_FILEPATH",
+                     ecore_file_dir_get(filename));
 }
 
 static bool
-open_file(const char* file)
+open_file(const char *file)
 {
-    restore_global_settings((char*)file);
+    restore_global_settings((char *) file);
 
-    document = epdf_document_new (file);
+    document = epdf_document_new(file);
     if (!document) {
-    // manage error here
-        fprintf(stderr,"Error Opening Document\n");
+        // manage error here
+        fprintf(stderr, "Error Opening Document\n");
         return false;
     }
 
-    numpages=epdf_document_page_count_get(document);
-    page = epdf_page_new (document);
+    numpages = epdf_document_page_count_get(document);
+    page = epdf_page_new(document);
     if (!page) {
-    // manage error here
-        fprintf(stderr,"Error Processing Document");
+        // manage error here
+        fprintf(stderr, "Error Processing Document");
 
         return false;
     }
-    curpdfobj=1;
+    curpdfobj = 1;
 
     filename = strdup(file);
 
-    pdf_index=epdf_index_new (document);
+    pdf_index = epdf_index_new(document);
 
     render_cur_page();
 
@@ -797,71 +838,66 @@ close_file()
 {
     ensure_thread_dead();
 
-    if(dbres!=(-1))
-    {
+    if (dbres != (-1)) {
         save_global_settings(filename);
         Evas_Object *pdfobj;
-        if(curpdfobj==1)
-            pdfobj=evas_object_name_find(evas,"pdfobj1");
+        if (curpdfobj == 1)
+            pdfobj = evas_object_name_find(evas, "pdfobj1");
         else
-            pdfobj=evas_object_name_find(evas,"pdfobj2");
-        int x,y,w,h;
-        evas_object_geometry_get(pdfobj,&x,&y,&w,&h);
-        set_setting_INT(filename,"current_x",x);
-        set_setting_INT(filename,"current_y",y);
-        set_setting_INT(filename,"antialias",get_antialias_mode());
+            pdfobj = evas_object_name_find(evas, "pdfobj2");
+        int x, y, w, h;
+        evas_object_geometry_get(pdfobj, &x, &y, &w, &h);
+        set_setting_INT(filename, "current_x", x);
+        set_setting_INT(filename, "current_y", y);
+        set_setting_INT(filename, "antialias", get_antialias_mode());
     }
     epdf_index_delete(pdf_index);
-    epdf_page_delete (page);
-    epdf_document_delete (document);
+    epdf_page_delete(page);
+    epdf_document_delete(document);
 
     free(filename);
     filename = NULL;
 }
 
-typedef struct
-{
-    char* msg;
+typedef struct {
+    char *msg;
     int size;
 } client_data_t;
 
-static int _client_add(void* param, int ev_type, void* ev)
+static int
+_client_add(void *param, int ev_type, void *ev)
 {
-    Ecore_Con_Event_Client_Add* e = ev;
-    client_data_t* msg = malloc(sizeof(client_data_t));
+    Ecore_Con_Event_Client_Add *e = ev;
+    client_data_t *msg = malloc(sizeof(client_data_t));
     msg->msg = strdup("");
     msg->size = 0;
     ecore_con_client_data_set(e->client, msg);
     return 0;
 }
 
-static int _client_del(void* param, int ev_type, void* ev)
+static int
+_client_del(void *param, int ev_type, void *ev)
 {
-    Ecore_Con_Event_Client_Del* e = ev;
-    client_data_t* msg = ecore_con_client_data_get(e->client);
+    Ecore_Con_Event_Client_Del *e = ev;
+    client_data_t *msg = ecore_con_client_data_get(e->client);
 
     /* Handle */
 
-    if(!msg->msg[0])
-    {
+    if (!msg->msg[0]) {
         /* Skip it: ecore-con internal bug */
-    }
-    else if(msg->size < 1)
-    {
+    } else if (msg->size < 1) {
         fprintf(stderr, "No filename was received\n");
-    }
-    else
-    {
-        Ecore_Evas* win = (Ecore_Evas*)param;
+    } else {
+        Ecore_Evas *win = (Ecore_Evas *) param;
 
-        char* oldfile = strdup(filename);
+        char *oldfile = strdup(filename);
 
         close_file();
 
-        if(!open_file(msg->msg))
+        if (!open_file(msg->msg))
             open_file(oldfile);
 
-        if(oldfile)
+        if (oldfile)
             free(oldfile);
 
         set_properties(win);
@@ -875,34 +911,37 @@ static int _client_del(void* param, int ev_type, void* ev)
     return 0;
 }
 
-static int _client_data(void* param, int ev_type, void* ev)
+static int
+_client_data(void *param, int ev_type, void *ev)
 {
-    Ecore_Con_Event_Client_Data* e = ev;
-    client_data_t* msg = ecore_con_client_data_get(e->client);
+    Ecore_Con_Event_Client_Data *e = ev;
+    client_data_t *msg = ecore_con_client_data_get(e->client);
     msg->msg = realloc(msg->msg, msg->size + e->size);
     memcpy(msg->msg + msg->size, e->data, e->size);
     msg->size += e->size;
     return 0;
 }
 
-static bool check_running_instance(const char* file)
+static bool
+check_running_instance(const char *file)
 {
-    if(!file)
+    if (!file)
         return true;
 
-    Ecore_Con_Server* server
-        = ecore_con_server_add(ECORE_CON_LOCAL_USER, "locopdf-singleton", 0, NULL);
+    Ecore_Con_Server *server
+        =
+        ecore_con_server_add(ECORE_CON_LOCAL_USER, "locopdf-singleton", 0,
+                             NULL);
 
-    if(!server)
-    {
+    if (!server) {
         /* Somebody already listens there */
         server = ecore_con_server_connect(ECORE_CON_LOCAL_USER,
                                           "locopdf-singleton", 0, NULL);
 
-        if(!server)
+        if (!server)
             return false;
 
-        char* buf = (char*)malloc(strlen(file) + 1);
+        char *buf = (char *) malloc(strlen(file) + 1);
         strcpy(buf, file);
         buf[strlen(file)] = '\0';
         ecore_con_server_send(server, buf, strlen(file) + 1);
@@ -922,13 +961,14 @@ usage()
     fprintf(stderr, "Usage: locopdf <pdf file>\n");
 }
 
-int main(int argc, char *argv[])
+int
+main(int argc, char *argv[])
 {
     Ecore_Evas *ee;
 
-    Evas_Object *bg,*o1,*o2;
+    Evas_Object *bg, *o1, *o2;
 
-    if(argc != 2) {
+    if (argc != 2) {
         usage();
         return 1;
     }
@@ -936,8 +976,7 @@ int main(int argc, char *argv[])
     ecore_init();
     ecore_con_init();
 
-    if(check_running_instance(argv[1]))
-    {
+    if (check_running_instance(argv[1])) {
         ecore_con_shutdown();
         ecore_shutdown();
         return 0;
@@ -953,19 +992,19 @@ int main(int argc, char *argv[])
     set_antialias_mode(true);
     /* setup database */
 
-    const char *homedir=getenv("HOME");
+    const char *homedir = getenv("HOME");
     char *settingsdir;
-    asprintf(&settingsdir,"%s/%s",homedir,".locopdf/");
-    if(!(ecore_file_exists(settingsdir) && ecore_file_is_dir(settingsdir)))
-    {
+    asprintf(&settingsdir, "%s/%s", homedir, ".locopdf/");
+    if (!(ecore_file_exists(settingsdir)
+          && ecore_file_is_dir(settingsdir))) {
         ecore_file_mkpath(settingsdir);
     }
     free(settingsdir);
     char *dbfile;
-    asprintf(&dbfile,"%s/%s",homedir,".locopdf/files.db");
-    dbres=init_database(dbfile);
+    asprintf(&dbfile, "%s/%s", homedir, ".locopdf/files.db");
+    dbres = init_database(dbfile);
     free(dbfile);
-    if(dbres!=(-1))
+    if (dbres != (-1))
         restore_global_settings(argv[1]);
 
     /* create our Ecore_Evas and show it */
@@ -989,36 +1028,37 @@ int main(int argc, char *argv[])
     evas_object_resize(bg, 600, 800);
     evas_object_name_set(bg, "background");
     evas_object_focus_set(bg, 1);
-    evas_object_event_callback_add(bg, EVAS_CALLBACK_KEY_UP, _key_handler, NULL);
+    evas_object_event_callback_add(bg, EVAS_CALLBACK_KEY_UP, _key_handler,
+                                   NULL);
     evas_object_show(bg);
 
     /* mutex for epdf access */
-    pthread_mutexattr_t   mta;
+    pthread_mutexattr_t mta;
     pthread_mutex_init(&pdf_renderer_mutex, &mta);
     pthread_mutexattr_settype(&mta, PTHREAD_MUTEX_RECURSIVE);
 
-    o2 = evas_object_image_add (evas);
-    evas_object_move (o2, 0, 0);
+    o2 = evas_object_image_add(evas);
+    evas_object_move(o2, 0, 0);
     evas_object_name_set(o2, "pdfobj2");
 
-    o1 = evas_object_image_add (evas);
+    o1 = evas_object_image_add(evas);
     evas_object_move(o1, 0, 0);
     evas_object_name_set(o1, "pdfobj1");
 
-    if(dbres!=(-1))
-    {
-        int am=get_setting_INT(argv[1],"antialias");
-        if(am>=0)
+    if (dbres != (-1)) {
+        int am = get_setting_INT(argv[1], "antialias");
+        if (am >= 0)
             set_antialias_mode(am);
     }
 
-    if(!open_file(argv[1]))
+    if (!open_file(argv[1]))
         return 1;
 
     set_properties(ee);
 
     ecore_event_handler_add(ECORE_CON_EVENT_CLIENT_ADD, _client_add, NULL);
-    ecore_event_handler_add(ECORE_CON_EVENT_CLIENT_DATA, _client_data, NULL);
+    ecore_event_handler_add(ECORE_CON_EVENT_CLIENT_DATA, _client_data,
+                            NULL);
     ecore_event_handler_add(ECORE_CON_EVENT_CLIENT_DEL, _client_del, ee);
 
     /* start the main event loop */
@@ -1027,9 +1067,9 @@ int main(int argc, char *argv[])
     close_file();
 
     fini_database();
-    evas_object_del (o1);
-    evas_object_del (o2);
-    evas_object_del (bg);
+    evas_object_del(o1);
+    evas_object_del(o2);
+    evas_object_del(bg);
 
     pthread_mutex_destroy(&pdf_renderer_mutex);
 

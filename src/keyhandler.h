@@ -3,8 +3,9 @@
 
 #include <stdbool.h>
 
-typedef void (*key_handler_t)(Evas *e, Evas_Object *obj);
-typedef void (*item_handler_t)(Evas *e, Evas_Object *obj,int index, bool lp);
+typedef void (*key_handler_t) (Evas * e, Evas_Object * obj);
+typedef void (*item_handler_t) (Evas * e, Evas_Object * obj, int index,
+                                bool lp);
 
 typedef struct {
     key_handler_t ok_handler;
@@ -21,6 +22,6 @@ typedef struct {
 } key_handler_info_t;
 
 /* FIXME: HACK */
-void set_key_handler(Evas_Object* obj, key_handler_info_t* handler_info);
+void set_key_handler(Evas_Object * obj, key_handler_info_t * handler_info);
 
 #endif
