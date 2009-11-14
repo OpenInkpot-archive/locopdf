@@ -1,3 +1,10 @@
+locopdf (0.1-14) asimov; urgency=low
+
+  * Implement tile rendering
+  * Fix coding style
+
+ -- Alexander Kerner <lunohod@openinkpot.org>  Sat, 14 Nov 2009 01:50:27 +0100
+
 locopdf (0.1-13) asimov; urgency=low
 
   * Terminate if broken file supplied
