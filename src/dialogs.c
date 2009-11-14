@@ -76,7 +76,7 @@ void hpan_entryhandler(Evas *e, Evas_Object *obj,char *value)
         if(numval>0 && numval<=100)
         {
             set_hpan_inc(((double)numval)/100.0);
-            reset_cur_panning();
+            //reset_cur_panning();
             char *tempo;
             asprintf(&tempo,"%s%%",value);
             update_label(e,preferenceschoicebox,0,tempo);
@@ -103,7 +103,7 @@ void vpan_entryhandler(Evas *e, Evas_Object *obj,char *value)
         if(numval>0 && numval<=100)
         {
             set_vpan_inc(((double)numval)/100.0);
-            reset_cur_panning();
+            //reset_cur_panning();
             char *tempo;
             asprintf(&tempo,"%s%%",value);
             update_label(e,preferenceschoicebox,1,tempo);
@@ -132,7 +132,7 @@ void zoom_entryhandler(Evas *e, Evas_Object *obj,char *value)
             set_zoom_inc(((double)numval)/100.0);
             char *tempo;
             asprintf(&tempo,"%s%%",value);
-            update_label(e,preferenceschoicebox,3,tempo);
+            update_label(e,preferenceschoicebox,2,tempo);
             free(tempo);
         }
         free(value);
@@ -256,7 +256,7 @@ void fitmode_choicehandler(Evas *e, Evas_Object *parent,int choice, bool lp)
     if(get_fit_mode()!=choice)
     {
         set_fit_mode(choice);
-        update_label(e,preferenceschoicebox,4,FIT_STRINGS[choice]);
+        update_label(e,preferenceschoicebox,3,FIT_STRINGS[choice]);
         
         evas_object_focus_set(choicebox_get_parent(e,parent),1);
         fini_choicebox(e,parent);
@@ -382,23 +382,24 @@ void preferences_choicehandler(Evas *e, Evas_Object *parent,int choice, bool lp)
         VPanEntry(e,parent,startval);    
         free(startval);
     }
-    else if(choice==2)
+/*    else if(choice==2)
     {
         TrimmingDialog(e,parent);    
     }
-	else if(choice==3)
+*/
+	else if(choice==2)
     {
         char *startval;
         asprintf(&startval,"%d",(int)(get_zoom_inc()*100));
         ZoomEntry(e,parent,startval);    
         free(startval);
     }
-    else if(choice==4)
+    else if(choice==3)
     {
         FitModeDialog(e,parent);    
         
     }
-    else if(choice==5)
+    /*    else if(choice==5)
     {
         set_antialias_mode(!get_antialias_mode());
         update_label(e,preferenceschoicebox,5,OFF_ON_STRINGS[get_antialias_mode()]);
@@ -410,6 +411,7 @@ void preferences_choicehandler(Evas *e, Evas_Object *parent,int choice, bool lp)
         set_reader_mode(!get_reader_mode());
         update_label(e,preferenceschoicebox,6,OFF_ON_STRINGS[get_reader_mode()]);
     }
+    */
 }
 
 void PreferencesDialog(Evas *e, Evas_Object *obj)
@@ -417,11 +419,10 @@ void PreferencesDialog(Evas *e, Evas_Object *obj)
 	const char *initchoices[] = { 		
 		"1. Hor. Panning",
 		"2. Ver. Panning",
-		"3. Trimming",
-		"4. Zoom Increment",
-        "5. Fit Mode",
-        "6. Antialias",
-        "7. Reader Mode",
+	//	"3. Trimming",
+		"3. Zoom Increment",
+        "4. Fit Mode",
+    //    "6. Antialias",
 	};
     
     
@@ -437,14 +438,13 @@ void PreferencesDialog(Evas *e, Evas_Object *obj)
 	const char *values[] = {
 		hpan,	
 		vpan,
-		"",
+		//"",
 		zoom,
         FIT_STRINGS[get_fit_mode()],
-        OFF_ON_STRINGS[get_antialias_mode()],
-        OFF_ON_STRINGS[get_reader_mode()],
+    //    OFF_ON_STRINGS[get_antialias_mode()],
 	};
     
-	preferenceschoicebox=init_choicebox(e,initchoices, values, 7, preferences_choicehandler, "LoCoPDF Settings",obj, NULL);
+	preferenceschoicebox=init_choicebox(e,initchoices, values, 4, preferences_choicehandler, "LoCoPDF Settings",obj, NULL);
     int x,y,w,h;
     evas_object_geometry_get(preferenceschoicebox,&x,&y,&w,&h);
     evas_object_move(preferenceschoicebox,(int)(((double)get_win_width()-w)/2.0),(int)(((double)get_win_height()-h)/2.0));
