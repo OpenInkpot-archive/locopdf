@@ -72,6 +72,8 @@ wprop_set_active_win_id(Ecore_X_Window root, Ecore_X_Window win)
 void
 wprop_set_string(Ecore_X_Window win, const char *prop, const char *value)
 {
+    if(!value)
+        value = "";
     xcb_connection_t *conn = connection_get();
     if (!conn)
         return;
