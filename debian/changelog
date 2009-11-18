@@ -1,3 +1,10 @@
+locopdf (0.1-15) asimov; urgency=low
+
+  * Fix segfault in wprop_set_string
+  * Rewrite epdf code as plugin
+
+ -- Alexander Kerner <lunohod@openinkpot.org>  Wed, 18 Nov 2009 20:54:28 +0100
+
 locopdf (0.1-14) asimov; urgency=low
 
   * Implement tile rendering
