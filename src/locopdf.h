@@ -1,7 +1,8 @@
 #ifndef LOCOPDF_H_
 #define LOCOPDF_H_
 
-#include <Epdf.h>
+//#include "plugin.h"
+
 #define FIT_TEXT_WIDTH 0
 #define FIT_WIDTH 1
 #define FIT_HEIGHT 2
@@ -9,6 +10,11 @@
 #define FIT_STRETCH 4
 #define FIT_NO 5
 
+typedef void * loco_document;
+typedef void * loco_page;
+typedef void * loco_index_item;
+typedef int loco_link_action_kind;
+typedef struct _plugin_ops_t plugin_ops_t;
 
 char *get_theme_file();
 int get_win_width();
@@ -36,7 +42,8 @@ void set_reader_mode(int newreadermode);
 int get_num_pages();
 void goto_page(int newpage);
 int get_cur_page();
-Epdf_Document *get_document();
+loco_document get_document();
+plugin_ops_t *get_ops();
 
 void render_cur_page();
 void prerender_next_page();

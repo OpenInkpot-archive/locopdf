@@ -49,6 +49,9 @@
 #include <xcb/xcb.h>
 #include "info_export.h"
 
+#include "plugin.h"
+#include "epdf_plugin.h"
+
 #define REL_THEME "themes/themes_oitheme.edj"
 
 /* Uzhosnakh */
@@ -58,8 +61,8 @@ static keys_t *keys;
 pthread_t thread;
 
 Evas *evas;
-Epdf_Document *document;
-Epdf_Page *page;
+loco_document document;
+loco_page page;
 Ecore_List *pdf_index;
 char *filename;
 int dbres;
@@ -83,6 +86,8 @@ int panx = 0;
 int pany = 0;
 int winwidth = 600;
 int winheight = 800;
+
+plugin_ops_t *loco_ops = NULL;
 
 typedef struct {
     int page;
@@ -188,9 +193,9 @@ get_tile(tile_t curtile, tile_orientation_t orient)
             && curtile.page > (numpages - 1))
             return tile;
 
-        epdf_page_page_set(page, curtile.page);
-        epdf_page_size_get(page, &width, &height);
-        epdf_page_content_geometry_get(page, &x, &y, &cwidth, &cheight);
+        loco_ops->page_page_set(page, curtile.page);
+        loco_ops->page_size_get(page, &width, &height);
+        loco_ops->page_content_geometry_get(page, &x, &y, &cwidth, &cheight);
 
         if (orient == CUR && (cwidth == 0 || cheight == 0))
             curtile.page++;
@@ -454,10 +459,15 @@ get_cur_page()
     return cur_tile.page;
 }
 
-Epdf_Document *
+loco_document
 get_document()
 {
     return document;
+}
+
+plugin_ops_t *get_ops()
+{
+    return loco_ops;
 }
 
 void
@@ -485,11 +495,11 @@ render_tile(tile_t tile)
     else
         pdfobj = evas_object_name_find(evas, "pdfobj1");
 
-    if (epdf_page_page_get(page) != tile.page)
-        epdf_page_page_set(page, tile.page);
-    epdf_page_scale_set(page, tile.pscale, tile.pscale);
+    if (loco_ops->page_page_get(page) != tile.page)
+        loco_ops->page_page_set(page, tile.page);
+    loco_ops->page_scale_set(page, tile.pscale, tile.pscale);
 
-    epdf_page_render_slice(page,
+    loco_ops->page_render_slice(page,
                            pdfobj,
                            tile.px + tile.x,
                            tile.py + tile.y, tile.w, tile.h);
@@ -744,20 +754,33 @@ restore_global_settings(char *filename)
     temp11 = get_setting_INT(filename, "current_page");
     if (temp11 >= 0)
         cur_tile.page = (int) temp11;
+    else
+        cur_tile.page = 0;
 
     temp21 = get_setting_DOUBLE(filename, "zoom_increment");
     temp22 = get_setting_DOUBLE(filename, "current_zoom");
-    if (temp21 > 0 && temp22 > 0) {
+    if (temp21 > 0)
         zoominc = temp21;
+    else
+        zoominc = 0.1;
+
+    if (temp22 > 0)
         zoom = temp22;
-    }
+    else
+        zoom = 1.0;
+
     temp21 = get_setting_DOUBLE(filename, "h_pan_increment");
     temp22 = get_setting_DOUBLE(filename, "v_pan_increment");
-    if (temp21 > 0 && temp22 > 0) {
+    if (temp21 > 0)
         hpaninc = temp21;
-        vpaninc = temp22;
+    else
+        hpaninc = 0.5;
 
-    }
+    if (temp22 > 0)
+        vpaninc = temp22;
+    else
+        vpaninc = 0.9;
+
 
     /*
        temp11=get_setting_INT(filename,"left_trim");
@@ -774,25 +797,33 @@ restore_global_settings(char *filename)
        }
      */
     temp11 = get_setting_INT(filename, "fit_mode");
-    if (temp11 >= 0) {
+    if (temp11 >= 0)
         fitmode = temp11;
-    }
+    else
+        fitmode = FIT_TEXT_WIDTH;
 }
 
 static void
-set_properties(Ecore_Evas * ee)
+set_active_win_id(Ecore_Evas * ee)
 {
     Ecore_X_Window root =
         ((xcb_screen_t *) ecore_x_default_screen_get())->root;
     Ecore_X_Window window = ecore_evas_software_x11_window_get(ee);
 
     wprop_set_active_win_id(root, window);
+}
+
+
+static void
+set_properties(Ecore_Evas * ee)
+{
+    Ecore_X_Window window = ecore_evas_software_x11_window_get(ee);
 
     wprop_set_string(window, "ACTIVE_DOC_AUTHOR",
-                     epdf_document_author_get(document));
+                     loco_ops->document_author_get(document));
     char *buf;
-    asprintf(&buf, "%s - %s", epdf_document_title_get(document),
-             epdf_document_subject_get(document));
+    asprintf(&buf, "%s - %s", loco_ops->document_title_get(document),
+             loco_ops->document_subject_get(document));
     wprop_set_string(window, "ACTIVE_DOC_TITLE", buf);
     if (buf)
         free(buf);
@@ -807,15 +838,19 @@ open_file(const char *file)
 {
     restore_global_settings((char *) file);
 
-    document = epdf_document_new(file);
+    loco_ops = pdf_init();
+    if(!loco_ops)
+        return false;
+
+    document = loco_ops->document_new(file);
     if (!document) {
         // manage error here
         fprintf(stderr, "Error Opening Document\n");
         return false;
     }
 
-    numpages = epdf_document_page_count_get(document);
-    page = epdf_page_new(document);
+    numpages = loco_ops->document_page_count_get(document);
+    page = loco_ops->page_new(document);
     if (!page) {
         // manage error here
         fprintf(stderr, "Error Processing Document");
@@ -826,7 +861,7 @@ open_file(const char *file)
 
     filename = strdup(file);
 
-    pdf_index = epdf_index_new(document);
+    pdf_index = loco_ops->index_new(document);
 
     render_cur_page();
 
@@ -851,9 +886,9 @@ close_file()
         set_setting_INT(filename, "current_y", y);
         set_setting_INT(filename, "antialias", get_antialias_mode());
     }
-    epdf_index_delete(pdf_index);
-    epdf_page_delete(page);
-    epdf_document_delete(document);
+    loco_ops->index_delete(pdf_index);
+    loco_ops->page_delete(page);
+    loco_ops->document_delete(document);
 
     free(filename);
     filename = NULL;
@@ -1050,6 +1085,8 @@ main(int argc, char *argv[])
         if (am >= 0)
             set_antialias_mode(am);
     }
+
+    set_active_win_id(ee);
 
     if (!open_file(argv[1]))
         return 1;

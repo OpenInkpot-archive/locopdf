@@ -26,6 +26,9 @@
 #include "choicebox.h"
 #include "entrybox.h"
 #include "locopdf.h"
+#include "plugin.h"
+
+extern plugin_ops_t *loco_ops;
 
 const char *FIT_STRINGS[] = {
     "Fit Text Width",
@@ -514,9 +517,9 @@ void
 toc_choicehandler(Evas * e, Evas_Object * parent, int choice, bool lp)
 {
     Ecore_List *list = (Ecore_List *) choicebox_get_userdata(e, parent);
-    Epdf_Index_Item *curitem =
-        (Epdf_Index_Item *) ecore_list_index_goto(list, choice);
-    Ecore_List *childlist = epdf_index_item_children_get(curitem);
+    loco_index_item curitem =
+        (loco_index_item) ecore_list_index_goto(list, choice);
+    Ecore_List *childlist = loco_ops->index_item_children_get(curitem);
     if (!childlist) {
         Evas_Object *curcb = parent;
         Evas_Object *nextcb;
@@ -525,7 +528,7 @@ toc_choicehandler(Evas * e, Evas_Object * parent, int choice, bool lp)
             curcb = nextcb;
         }
         evas_object_focus_set(curcb, 1);
-        goto_page(epdf_index_item_page_get(get_document(), curitem));
+        goto_page(loco_ops->index_item_page_get(get_document(), curitem));
     } else {
         TOCDialog(e, parent, childlist);
 
@@ -544,7 +547,7 @@ TOCDialog(Evas * e, Evas_Object * obj, Ecore_List * list)
     int i;
     for (i = 0; i < numchoices; i++) {
         asprintf(&(initchoices[i]), "%d. %s", (i % 8 + 1),
-                 epdf_index_item_title_get((Epdf_Index_Item *)
+                 loco_ops->index_item_title_get((loco_index_item)
                                            ecore_list_next(list)));
 
     }
