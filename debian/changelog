@@ -1,3 +1,9 @@
+locopdf (0.1-16) asimov; urgency=low
+
+  * Fix mutex initializing
+
+ -- Alexander Kerner <lunohod@openinkpot.org>  Wed, 18 Nov 2009 23:42:32 +0100
+
 locopdf (0.1-15) asimov; urgency=low
 
   * Fix segfault in wprop_set_string
