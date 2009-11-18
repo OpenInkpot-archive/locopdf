@@ -1069,8 +1069,10 @@ main(int argc, char *argv[])
 
     /* mutex for epdf access */
     pthread_mutexattr_t mta;
-    pthread_mutex_init(&pdf_renderer_mutex, &mta);
+    pthread_mutexattr_init(&mta);
     pthread_mutexattr_settype(&mta, PTHREAD_MUTEX_RECURSIVE);
+    pthread_mutex_init(&pdf_renderer_mutex, &mta);
+    pthread_mutexattr_destroy(&mta);
 
     o2 = evas_object_image_add(evas);
     evas_object_move(o2, 0, 0);
