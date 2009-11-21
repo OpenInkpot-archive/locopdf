@@ -35,9 +35,9 @@
 #include <Ecore_Evas.h>
 #include <Ecore_Con.h>
 #include <Ecore_File.h>
+#include <Efreet_Mime.h>
 #include <Edje.h>
 #include <Evas.h>
-#include <epdf/Epdf.h>
 
 #include <libkeys.h>
 
@@ -51,6 +51,7 @@
 
 #include "plugin.h"
 #include "epdf_plugin.h"
+#include "edjvu_plugin.h"
 
 #define REL_THEME "themes/themes_oitheme.edj"
 
@@ -193,16 +194,16 @@ get_tile(tile_t curtile, tile_orientation_t orient)
             && curtile.page > (numpages - 1))
             return tile;
 
-        loco_ops->page_page_set(page, curtile.page);
-        loco_ops->page_size_get(page, &width, &height);
-        loco_ops->page_content_geometry_get(page, &x, &y, &cwidth, &cheight);
+        if(loco_ops->page_page_set) loco_ops->page_page_set(page, curtile.page);
+        if(loco_ops->page_size_get) loco_ops->page_size_get(page, &width, &height);
+        if(loco_ops->page_content_geometry_get) loco_ops->page_content_geometry_get(page, &x, &y, &cwidth, &cheight);
 
         if (orient == CUR && (cwidth == 0 || cheight == 0))
             curtile.page++;
 
     } while (cwidth == 0 || cheight == 0);
 
-    if (fitmode == FIT_TEXT_WIDTH) {
+    if (fitmode == FIT_TEXT_WIDTH && width != cwidth && height != cheight) {
         _lefttrim = x - 10;
         _righttrim = width - x - cwidth - 5;
         _bottomtrim = y - 10;
@@ -266,8 +267,8 @@ get_tile(tile_t curtile, tile_orientation_t orient)
     if (!_lefttrim && !_righttrim && !_toptrim && !_bottomtrim) {
         tile.px = 0;
         tile.py = 0;
-        tile.pw = width;
-        tile.ph = height;
+        tile.pw = width * scalex;
+        tile.ph = height * scaley;
     } else {
         tile.px = (int) (((double) _lefttrim) * scalex);
         tile.py = (int) (((double) _toptrim) * scaley);
@@ -430,14 +431,25 @@ set_fit_mode(int newfitmode)
 int
 get_antialias_mode()
 {
-    return epdf_fonts_antialias_get() && epdf_lines_antialias_get();
+    int ret = 0;
+
+    if(loco_ops->fonts_antialias_get)
+        ret = loco_ops->fonts_antialias_get();
+
+    if(loco_ops->lines_antialias_get)
+        ret += loco_ops->lines_antialias_get();
+
+    return ret;
 }
 
 void
 set_antialias_mode(int newantialiasmode)
 {
-    epdf_fonts_antialias_set(newantialiasmode ? 1 : 0);
-    epdf_lines_antialias_set(newantialiasmode ? 1 : 0);
+
+    if(loco_ops->fonts_antialias_set)
+        loco_ops->fonts_antialias_set(newantialiasmode ? 1 : 0);
+    if(loco_ops->lines_antialias_set)
+        loco_ops->lines_antialias_set(newantialiasmode ? 1 : 0);
 }
 
 int
@@ -495,11 +507,10 @@ render_tile(tile_t tile)
     else
         pdfobj = evas_object_name_find(evas, "pdfobj1");
 
-    if (loco_ops->page_page_get(page) != tile.page)
-        loco_ops->page_page_set(page, tile.page);
-    loco_ops->page_scale_set(page, tile.pscale, tile.pscale);
+    if(loco_ops->page_page_set) loco_ops->page_page_set(page, tile.page);
+    if(loco_ops->page_scale_set) loco_ops->page_scale_set(page, tile.pscale, tile.pscale);
 
-    loco_ops->page_render_slice(page,
+    if(loco_ops->page_render_slice) loco_ops->page_render_slice(page,
                            pdfobj,
                            tile.px + tile.x,
                            tile.py + tile.y, tile.w, tile.h);
@@ -819,9 +830,11 @@ set_properties(Ecore_Evas * ee)
 {
     Ecore_X_Window window = ecore_evas_software_x11_window_get(ee);
 
+    if(loco_ops->document_author_get)
     wprop_set_string(window, "ACTIVE_DOC_AUTHOR",
                      loco_ops->document_author_get(document));
     char *buf;
+    if(loco_ops->document_title_get && loco_ops->document_subject_get)
     asprintf(&buf, "%s - %s", loco_ops->document_title_get(document),
              loco_ops->document_subject_get(document));
     wprop_set_string(window, "ACTIVE_DOC_TITLE", buf);
@@ -838,19 +851,31 @@ open_file(const char *file)
 {
     restore_global_settings((char *) file);
 
-    loco_ops = pdf_init();
+    const char *mime = efreet_mime_type_get(file);
+    if(!mime)
+        return false;
+    if(!strcmp(mime, "image/vnd.djvu"))
+        loco_ops = djvu_init();
+    else if(!strcmp(mime, "application/pdf"))
+        loco_ops = pdf_init();
+    else
+        return false;
+
     if(!loco_ops)
         return false;
 
-    document = loco_ops->document_new(file);
+    if(loco_ops->document_new)
+        document = loco_ops->document_new(file);
     if (!document) {
         // manage error here
         fprintf(stderr, "Error Opening Document\n");
         return false;
     }
 
-    numpages = loco_ops->document_page_count_get(document);
-    page = loco_ops->page_new(document);
+    if(loco_ops->document_page_count_get)
+        numpages = loco_ops->document_page_count_get(document);
+    if(loco_ops->page_new)
+        page = loco_ops->page_new(document);
     if (!page) {
         // manage error here
         fprintf(stderr, "Error Processing Document");
@@ -861,7 +886,15 @@ open_file(const char *file)
 
     filename = strdup(file);
 
-    pdf_index = loco_ops->index_new(document);
+    if(loco_ops->index_new)
+        pdf_index = loco_ops->index_new(document);
+
+    set_antialias_mode(true);
+    if (dbres != (-1)) {
+        int am = get_setting_INT((char*)file, "antialias");
+        if (am >= 0)
+            set_antialias_mode(am);
+    }
 
     render_cur_page();
 
@@ -886,9 +919,9 @@ close_file()
         set_setting_INT(filename, "current_y", y);
         set_setting_INT(filename, "antialias", get_antialias_mode());
     }
-    loco_ops->index_delete(pdf_index);
-    loco_ops->page_delete(page);
-    loco_ops->document_delete(document);
+    if(loco_ops->index_delete) loco_ops->index_delete(pdf_index);
+    if(loco_ops->page_delete) loco_ops->page_delete(page);
+    if(loco_ops->document_delete) loco_ops->document_delete(document);
 
     free(filename);
     filename = NULL;
@@ -1022,9 +1055,10 @@ main(int argc, char *argv[])
     ecore_evas_init();
     edje_init();
 
+    efreet_mime_init();
+
     keys = keys_alloc("locopdf");
 
-    set_antialias_mode(true);
     /* setup database */
 
     const char *homedir = getenv("HOME");
@@ -1082,12 +1116,6 @@ main(int argc, char *argv[])
     evas_object_move(o1, 0, 0);
     evas_object_name_set(o1, "pdfobj1");
 
-    if (dbres != (-1)) {
-        int am = get_setting_INT(argv[1], "antialias");
-        if (am >= 0)
-            set_antialias_mode(am);
-    }
-
     set_active_win_id(ee);
 
     if (!open_file(argv[1]))
@@ -1112,6 +1140,7 @@ main(int argc, char *argv[])
 
     pthread_mutex_destroy(&pdf_renderer_mutex);
 
+    efreet_mime_shutdown();
     edje_shutdown();
     ecore_evas_shutdown();
     ecore_con_shutdown();
