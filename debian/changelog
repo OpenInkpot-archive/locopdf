@@ -1,3 +1,10 @@
+locopdf (0.1-17) asimov; urgency=low
+
+  * Add djvu plugin
+  * Add libefreet-dev and libedjvu-dev to BD
+
+ -- Alexander Kerner <lunohod@openinkpot.org>  Sat, 21 Nov 2009 21:49:49 +0100
+
 locopdf (0.1-16) asimov; urgency=low
 
   * Fix mutex initializing
