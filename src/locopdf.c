@@ -831,15 +831,14 @@ set_properties(Ecore_Evas * ee)
     Ecore_X_Window window = ecore_evas_software_x11_window_get(ee);
 
     if(loco_ops->document_author_get)
-    wprop_set_string(window, "ACTIVE_DOC_AUTHOR",
-                     loco_ops->document_author_get(document));
-    char *buf;
-    if(loco_ops->document_title_get && loco_ops->document_subject_get)
-    asprintf(&buf, "%s - %s", loco_ops->document_title_get(document),
-             loco_ops->document_subject_get(document));
-    wprop_set_string(window, "ACTIVE_DOC_TITLE", buf);
-    if (buf)
-        free(buf);
+        wprop_set_string(window, "ACTIVE_DOC_AUTHOR",
+                         loco_ops->document_author_get(document));
+    if(loco_ops->document_title_get)
+        wprop_set_string(window, "ACTIVE_DOC_TITLE",
+                         loco_ops->document_title_get(document));
+    else
+        wprop_set_string(window, "ACTIVE_DOC_TITLE",
+                         ecore_file_file_get(filename));
     wprop_set_string(window, "ACTIVE_DOC_FILENAME",
                      ecore_file_file_get(filename));
     wprop_set_string(window, "ACTIVE_DOC_FILEPATH",
