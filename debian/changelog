@@ -1,3 +1,10 @@
+locopdf (0.1-19) asimov; urgency=low
+
+  * Fix segfault
+  * Add djvu mime type to .desktop file
+
+ -- Alexander Kerner <lunohod@openinkpot.org>  Sun, 22 Nov 2009 01:41:50 +0100
+
 locopdf (0.1-17) asimov; urgency=low
 
   * Add djvu plugin
