@@ -1,13 +1,13 @@
 [Desktop Entry]
 Name=LocoPDF
-GenericName=PDF viewer
-GenericName[bg]=Преглед на PDF документи
-GenericName[cs]=Prohlížeč PDF
-GenericName[de]=PDF-Dokument lesen
-GenericName[hu]=PDF olvasó
-GenericName[pl]=Przeglądarka plików PDF
-GenericName[zh]=PDF查看器
+GenericName=PDF/DjVu viewer
+GenericName[bg]=Преглед на PDF/DjVu документи
+GenericName[cs]=Prohlížeč PDF/DjVu
+GenericName[de]=PDF/DjVu-Dokument lesen
+GenericName[hu]=PDF/DjVu olvasó
+GenericName[pl]=Przeglądarka plików PDF/DjVu
+GenericName[zh]=PDF/DjVu查看器
 Exec=locopdf %F
 Type=Application
 Categories=Office;Viewer;Literature;
-MimeType=application/pdf
+MimeType=application/pdf;image/vnd.djvu
