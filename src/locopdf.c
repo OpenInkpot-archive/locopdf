@@ -585,10 +585,10 @@ flip_pages()
 static void
 next_page()
 {
+    ensure_thread_dead();
     if (next_tile.page < 0)
         return;
     cur_tile = next_tile;
-    ensure_thread_dead();
     flip_pages();
     prerender_next_page();
 }
