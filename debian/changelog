@@ -1,3 +1,9 @@
+locopdf (0.1-20) asimov; urgency=low
+
+  * Fix race condition
+
+ -- Alexander Kerner <lunohod@openinkpot.org>  Mon, 23 Nov 2009 01:25:24 +0100
+
 locopdf (0.1-19) asimov; urgency=low
 
   * Fix segfault
