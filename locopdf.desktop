@@ -10,4 +10,4 @@ GenericName[zh]=PDF/DjVu查看器
 Exec=locopdf %F
 Type=Application
 Categories=Office;Viewer;Literature;
-MimeType=application/pdf;image/vnd.djvu
+MimeType=application/pdf;image/vnd.djvu;
