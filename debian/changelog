@@ -1,3 +1,10 @@
+locopdf (0.1-21) zelazny; urgency=low
+
+  * Add trailing semicolon to MimeType in locopdf.desktop
+  * Check argument of goto_page()
+
+ -- Alexander Kerner <lunohod@openinkpot.org>  Tue, 29 Dec 2009 23:40:50 +0100
+
 locopdf (0.1-20) asimov; urgency=low
 
   * Fix race condition
