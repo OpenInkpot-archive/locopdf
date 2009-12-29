@@ -461,6 +461,8 @@ get_num_pages()
 void
 goto_page(int newpage)
 {
+    if(newpage < 0)
+    	return;
     cur_tile.page = newpage;
     render_cur_page();
 }
