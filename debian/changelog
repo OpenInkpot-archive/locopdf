@@ -1,3 +1,10 @@
+locopdf (0.1.22) zelazny; urgency=low
+
+  * Rebuild due to EFL update
+  * Added Spanish .desktop translation (OI#755)
+
+ -- Mikhail Gusarov <dottedmag@dottedmag.net>  Fri, 15 Jan 2010 10:43:21 +0600
+
 locopdf (0.1-21) zelazny; urgency=low
 
   * Add trailing semicolon to MimeType in locopdf.desktop
