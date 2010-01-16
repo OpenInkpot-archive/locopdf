@@ -21,553 +21,524 @@
 #define _GNU_SOURCE
 
 #include <stdio.h>
+#include <string.h>
+#include <libintl.h>
 
 #include "dialogs.h"
-#include "choicebox.h"
-#include "entrybox.h"
 #include "locopdf.h"
 #include "plugin.h"
 
+#include <Edje.h>
+#include <libchoicebox.h>
+#include <libeoi.h>
+
+#include "choices.h"
+#include "entry.h"
+
+#define _(x) x
+
+#define ASIZE(x) sizeof((x))/sizeof((x)[0])
+
+#define GETTITLE \
+    edje_object_part_text_get(evas_object_name_find(canvas, "main_choicebox_edje"), "title");
+#define SETTITLE(x) \
+    edje_object_part_text_set(evas_object_name_find(canvas, "main_choicebox_edje"), "title", (x));
+
+void FitModeDialog(Evas *canvas, Evas_Object *parent, int item_num);
+
 extern plugin_ops_t *loco_ops;
 
-const char *FIT_STRINGS[] = {
-    "Fit Text Width",
-    "Fit Width",
-    "Fit Height",
-    "Best Fit",
-    "Stretch Fit",
-    "No Fit",
+typedef struct menu_item_t {
+    void (*draw) (Evas_Object *self);
+    void (*select) (Evas_Object *self, int item_num);
+    void *arg;
+} menu_item_t;
+
+typedef struct parent_t {
+    Evas_Object *parent;
+    int item_num;
+    const char *prev_title;
+} parent_t;
+
+const char *fit_strings[] = {
+    _("Fit Text Width"),
+    _("Fit Width"),
+    _("Fit Height"),
+    _("Best Fit"),
+    _("Stretch Fit"),
+    _("No Fit"),
 };
 
-const char *OFF_ON_STRINGS[] = {
-    "Off",
-    "On",
-};
+static bool refresh = false;
 
-
-Evas_Object *preferenceschoicebox, *zoomentrybox, *hpanentrybox,
-    *vpanentrybox, *trimmingchoicebox, *lefttrimentrybox,
-    *righttrimentrybox, *toptrimentrybox, *bottomtrimentrybox,
-    *fitmodechoicebox, *gotopageentrybox;
-//hpan entrybox
-void
-goto_page_entryhandler(Evas * e, Evas_Object * obj, char *value)
+void goto_entry_handler(Evas_Object* entry,
+        long num,
+        void* param)
 {
-    if (value) {
-        int numval = (int) strtol(value, NULL, 10);
-        if (numval > 0 && numval <= get_num_pages()) {
-            goto_page(numval - 1);
-        }
-        free(value);
-    }
+    if(param)
+        free(param);
+
+    if(num > 0 && num <= get_num_pages())
+        goto_page(num - 1);
 }
 
 void
-GotoPageEntry(Evas * e, Evas_Object * obj)
+GotoPageEntry(Evas *e, Evas_Object *obj)
 {
     char *tempstr;
-    asprintf(&tempstr, "Page? (%d/%d)", get_cur_page() + 1,
-             get_num_pages());
-    gotopageentrybox =
-        init_entrybox(e, tempstr, "", 4, goto_page_entryhandler, obj);
-    free(tempstr);
-    int x, y, w, h;
-    evas_object_geometry_get(gotopageentrybox, &x, &y, &w, &h);
-    evas_object_move(gotopageentrybox,
-                     (int) (((double) get_win_width() - w) / 2.0),
-                     (int) (((double) get_win_height() - h) / 2.0));
+    asprintf(&tempstr, "%s (%d/%d) ",
+            gettext("Go To Page"),
+            get_cur_page() + 1,
+            get_num_pages());
 
+    entry_n(obj, e,
+            goto_entry_handler, "goto-page-entry",
+            tempstr, tempstr);
 }
 
-//hpan entrybox
-void
-hpan_entryhandler(Evas * e, Evas_Object * obj, char *value)
+// Options dialogs
+void hpan_draw(Evas_Object *self)
 {
-    if (value) {
-        long numval = strtol(value, NULL, 10);
-        if (numval > 0 && numval <= 100) {
-            set_hpan_inc(((double) numval) / 100.0);
-            //reset_cur_panning();
-            char *tempo;
-            asprintf(&tempo, "%s%%", value);
-            update_label(e, preferenceschoicebox, 0, tempo);
-            free(tempo);
-        }
-        free(value);
+    char *c;
+    asprintf(&c, "%d%%", (int)(get_hpan_inc() * 100));
+    if(c) {
+        edje_object_part_text_set(self, "value", c);
+        free(c);
+    } else
+        edje_object_part_text_set(self, "value", "");
+
+    edje_object_part_text_set(self, "title", gettext("Horizontal Panning"));
+}
+
+void hpan_entry_handler(Evas_Object* entry,
+        long num,
+        void* param)
+{
+    if(num <= 0 || num > 100)
+        return;
+
+    set_hpan_inc(1.0 * num / 100);
+
+    parent_t *p = (parent_t*)param;
+    choicebox_invalidate_item(p->parent, p->item_num);
+    free(p);
+}
+
+void hpan_select(Evas_Object *self, int item_num)
+{
+    parent_t *p = (parent_t*)malloc(sizeof(parent_t));
+    p->parent = self;
+    p->item_num = item_num;
+
+    entry_n(self, evas_object_evas_get(self),
+            hpan_entry_handler, "hpan-entry",
+            gettext("Horizontal Panning"), p);
+}
+
+void vpan_entry_handler(Evas_Object* entry,
+        long num,
+        void* param)
+{
+    if(num <= 0 || num > 100)
+        return;
+
+    set_vpan_inc(1.0 * num / 100);
+
+    parent_t *p = (parent_t*)param;
+    choicebox_invalidate_item(p->parent, p->item_num);
+    free(p);
+}
+
+void vpan_draw(Evas_Object *self)
+{
+    char *c;
+    asprintf(&c, "%d%%", (int)(get_vpan_inc() * 100));
+    if(c) {
+        edje_object_part_text_set(self, "value", c);
+        free(c);
+    } else
+        edje_object_part_text_set(self, "value", "");
+
+    edje_object_part_text_set(self, "title", gettext("Vertical Panning"));
+}
+
+void vpan_select(Evas_Object *self, int item_num)
+{
+    parent_t *p = (parent_t*)malloc(sizeof(parent_t));
+    p->parent = self;
+    p->item_num = item_num;
+
+    entry_n(self, evas_object_evas_get(self),
+            vpan_entry_handler, "vpan-entry",
+            gettext("Vertical Panning"), p);
+}
+
+void zoom_entry_handler(Evas_Object* entry,
+        long num,
+        void* param)
+{
+    if(num <= 0)
+        return;
+
+    set_zoom(1.0 * num / 100);
+
+    if(param) {
+        refresh = true;
+
+        parent_t *p = (parent_t*)param;
+        choicebox_invalidate_item(p->parent, p->item_num);
+        free(p);
     }
 }
 
-void
-HPanEntry(Evas * e, Evas_Object * obj, const char *startval)
+void zoom_entry_handler_2(Evas_Object* entry,
+        long num,
+        void* param)
 {
-    hpanentrybox =
-        init_entrybox(e, "Hor. Panning Inc.", startval, 3,
-                      hpan_entryhandler, obj);
-    int x, y, w, h;
-    evas_object_geometry_get(hpanentrybox, &x, &y, &w, &h);
-    evas_object_move(hpanentrybox,
-                     (int) (((double) get_win_width() - w) / 2.0),
-                     (int) (((double) get_win_height() - h) / 2.0));
+    if(num <= 0)
+        return;
 
+    set_zoom(1.0 * num / 100);
+
+    if(param)
+        free(param);
+
+    render_cur_page();
 }
 
-//vpan entrybox
-void
-vpan_entryhandler(Evas * e, Evas_Object * obj, char *value)
+void zoom_draw(Evas_Object *self)
 {
-    if (value) {
-        long numval = strtol(value, NULL, 10);
-        if (numval > 0 && numval <= 100) {
-            set_vpan_inc(((double) numval) / 100.0);
-            //reset_cur_panning();
-            char *tempo;
-            asprintf(&tempo, "%s%%", value);
-            update_label(e, preferenceschoicebox, 1, tempo);
-            free(tempo);
-        }
-        free(value);
-    }
+    char *c;
+    asprintf(&c, "%d%%", (int)(get_zoom() * 100));
+    if(c) {
+        edje_object_part_text_set(self, "value", c);
+        free(c);
+    } else
+        edje_object_part_text_set(self, "value", "");
+
+    edje_object_part_text_set(self, "title", gettext("Zoom"));
 }
 
-void
-VPanEntry(Evas * e, Evas_Object * obj, const char *startval)
+void zoom_select(Evas_Object *self, int item_num)
 {
-    vpanentrybox =
-        init_entrybox(e, "Ver. Panning Inc.", startval, 3,
-                      vpan_entryhandler, obj);
-    int x, y, w, h;
-    evas_object_geometry_get(vpanentrybox, &x, &y, &w, &h);
-    evas_object_move(vpanentrybox,
-                     (int) (((double) get_win_width() - w) / 2.0),
-                     (int) (((double) get_win_height() - h) / 2.0));
+    parent_t *p = (parent_t*)malloc(sizeof(parent_t));
+    p->parent = self;
+    p->item_num = item_num;
 
+    entry_n(self, evas_object_evas_get(self),
+            zoom_entry_handler, "zoom-entry",
+            gettext("Zoom"), p);
 }
 
-//zoom entry box
-void
-zoom_entryhandler(Evas * e, Evas_Object * obj, char *value)
+void zoom_entry(Evas *canvas)
 {
-    if (value) {
-        long numval = strtol(value, NULL, 10);
-        if (numval > 0 && numval <= 100) {
-            set_zoom_inc(((double) numval) / 100.0);
-            char *tempo;
-            asprintf(&tempo, "%s%%", value);
-            update_label(e, preferenceschoicebox, 2, tempo);
-            free(tempo);
-        }
-        free(value);
-    }
+    char *tempstr;
+    asprintf(&tempstr, "%s (%d%%) ",
+            gettext("Zoom"),
+            (int)(get_zoom() * 100));
+
+    entry_n(NULL, canvas,
+            zoom_entry_handler_2, "zoom-entry",
+            tempstr, tempstr);
 }
 
-void
-ZoomEntry(Evas * e, Evas_Object * obj, const char *startval)
+void zoom_inc_entry_handler(Evas_Object* entry,
+        long num,
+        void* param)
 {
-    zoomentrybox =
-        init_entrybox(e, "Zoom Inc.", startval, 3, zoom_entryhandler, obj);
-    int x, y, w, h;
-    evas_object_geometry_get(zoomentrybox, &x, &y, &w, &h);
-    evas_object_move(zoomentrybox,
-                     (int) (((double) get_win_width() - w) / 2.0),
-                     (int) (((double) get_win_height() - h) / 2.0));
+    if(num <= 0)
+        return;
 
+    set_zoom_inc(1.0 * num / 100);
+
+    parent_t *p = (parent_t*)param;
+    choicebox_invalidate_item(p->parent, p->item_num);
+    free(p);
 }
 
-//left trimming entrybox
-void
-lefttrim_entryhandler(Evas * e, Evas_Object * obj, char *value)
+void zinc_draw(Evas_Object *self)
 {
-    if (value) {
-        long numval = strtol(value, NULL, 10);
-        set_lefttrim((int) numval);
-        char *tempo;
-        asprintf(&tempo, "%spx", value);
-        update_label(e, trimmingchoicebox, 0, tempo);
-        free(tempo);
-        free(value);
-        render_cur_page(true);
-        prerender_next_page();
-    }
+    char *c;
+    asprintf(&c, "%d%%", (int)(get_zoom_inc() * 100));
+    if(c) {
+        edje_object_part_text_set(self, "value", c);
+        free(c);
+    } else
+        edje_object_part_text_set(self, "value", "");
 
+    edje_object_part_text_set(self, "title", gettext("Zoom Increment"));
 }
 
-void
-LeftTrimEntry(Evas * e, Evas_Object * obj, const char *startval)
+void zinc_select(Evas_Object *self, int item_num)
 {
-    lefttrimentrybox =
-        init_entrybox(e, "Left Trimming.", startval, 3,
-                      lefttrim_entryhandler, obj);
-    int x, y, w, h;
-    evas_object_geometry_get(lefttrimentrybox, &x, &y, &w, &h);
-    evas_object_move(lefttrimentrybox,
-                     (int) (((double) get_win_width() - w) / 2.0),
-                     (int) (((double) get_win_height() - h) / 2.0));
+    parent_t *p = (parent_t*)malloc(sizeof(parent_t));
+    p->parent = self;
+    p->item_num = item_num;
 
+    entry_n(self, evas_object_evas_get(self),
+            zoom_inc_entry_handler, "zoom-inc-entry",
+            gettext("Zoom Increment"), p);
 }
 
-//right trimming entrybox
-void
-righttrim_entryhandler(Evas * e, Evas_Object * obj, char *value)
+void fit_draw(Evas_Object *self)
 {
-    if (value) {
-        long numval = strtol(value, NULL, 10);
-        set_righttrim((int) numval);
-        char *tempo;
-        asprintf(&tempo, "%spx", value);
-        update_label(e, trimmingchoicebox, 1, tempo);
-        free(tempo);
-        free(value);
-        render_cur_page(true);
-        prerender_next_page();
-    }
+    char *c = strdup(gettext(fit_strings[get_fit_mode()]));
+    if(c) {
+        edje_object_part_text_set(self, "value", c);
+        free(c);
+    } else
+        edje_object_part_text_set(self, "value", "");
+
+    edje_object_part_text_set(self, "title", gettext("Fit Mode"));
 }
 
-void
-RightTrimEntry(Evas * e, Evas_Object * obj, const char *startval)
+void fit_select(Evas_Object *self, int item_num)
 {
-    righttrimentrybox =
-        init_entrybox(e, "Right Trimming.", startval, 3,
-                      righttrim_entryhandler, obj);
-    int x, y, w, h;
-    evas_object_geometry_get(righttrimentrybox, &x, &y, &w, &h);
-    evas_object_move(righttrimentrybox,
-                     (int) (((double) get_win_width() - w) / 2.0),
-                     (int) (((double) get_win_height() - h) / 2.0));
-
+    FitModeDialog(evas_object_evas_get(self), self, item_num);
 }
 
-//top trimming entrybox
-void
-toptrim_entryhandler(Evas * e, Evas_Object * obj, char *value)
+struct menu_item_t preferences_menu_items[] = {
+    {&hpan_draw, &hpan_select, 0},
+    {&vpan_draw, &vpan_select, 0},
+    {&zoom_draw, &zoom_select, 0},
+    {&zinc_draw, &zinc_select, 0},
+    {&fit_draw, &fit_select, 0},
+};
+
+static void preferences_draw_handler(Evas_Object* choicebox __attribute__((unused)),
+                         Evas_Object* item,
+                         int item_num,
+                         int page_position __attribute__((unused)),
+                         void* param __attribute__((unused)))
 {
-    if (value) {
-        long numval = strtol(value, NULL, 10);
-        set_toptrim((int) numval);
-        char *tempo;
-        asprintf(&tempo, "%spx", value);
-        update_label(e, trimmingchoicebox, 2, tempo);
-        free(tempo);
-        free(value);
-        render_cur_page(true);
-        prerender_next_page();
-    }
+    preferences_menu_items[item_num].draw(item);
+}
+
+static
+void preferences_handler(Evas_Object* choicebox __attribute__((unused)),
+                    int item_num,
+                    bool is_alt __attribute__((unused)),
+                    void* param)
+{
+    preferences_menu_items[item_num].select(choicebox, item_num);
+}
+
+void preferences_close_handler(Evas_Object* choicebox,
+        void* param)
+{
+    choicebox_pop(choicebox);
+
+    if(!refresh)
+        return;
+
+    render_cur_page();
+
+    refresh = false;
 }
 
 void
-TopTrimEntry(Evas * e, Evas_Object * obj, const char *startval)
+PreferencesDialog(Evas *canvas, Evas_Object *parent)
 {
-    toptrimentrybox =
-        init_entrybox(e, "Top Trimming.", startval, 3,
-                      toptrim_entryhandler, obj);
-    int x, y, w, h;
-    evas_object_geometry_get(toptrimentrybox, &x, &y, &w, &h);
-    evas_object_move(toptrimentrybox,
-                     (int) (((double) get_win_width() - w) / 2.0),
-                     (int) (((double) get_win_height() - h) / 2.0));
+	choicebox_push(NULL, canvas,
+        preferences_handler, preferences_draw_handler, preferences_close_handler, "settings", ASIZE(preferences_menu_items), 0, NULL);
 
-}
-
-//bottom trimming entrybox
-void
-bottomtrim_entryhandler(Evas * e, Evas_Object * obj, char *value)
-{
-    if (value) {
-        long numval = strtol(value, NULL, 10);
-        set_bottomtrim((int) numval);
-        char *tempo;
-        asprintf(&tempo, "%spx", value);
-        update_label(e, trimmingchoicebox, 3, tempo);
-        free(tempo);
-        free(value);
-        render_cur_page(true);
-        prerender_next_page();
-    }
-}
-
-void
-BottomTrimEntry(Evas * e, Evas_Object * obj, const char *startval)
-{
-    bottomtrimentrybox =
-        init_entrybox(e, "Bottom Trimming.", startval, 3,
-                      bottomtrim_entryhandler, obj);
-    int x, y, w, h;
-    evas_object_geometry_get(bottomtrimentrybox, &x, &y, &w, &h);
-    evas_object_move(bottomtrimentrybox,
-                     (int) (((double) get_win_width() - w) / 2.0),
-                     (int) (((double) get_win_height() - h) / 2.0));
-
+    SETTITLE(gettext("Settings"));
 }
 
 // fitmode choicebox
 
-void
-fitmode_choicehandler(Evas * e, Evas_Object * parent, int choice, bool lp)
+static void fit_mode_draw_handler(Evas_Object* choicebox __attribute__((unused)),
+                         Evas_Object* item,
+                         int item_num,
+                         int page_position __attribute__((unused)),
+                         void* param __attribute__((unused)))
 {
-    if (get_fit_mode() != choice) {
-        set_fit_mode(choice);
-        update_label(e, preferenceschoicebox, 3, FIT_STRINGS[choice]);
-
-        evas_object_focus_set(choicebox_get_parent(e, parent), 1);
-        fini_choicebox(e, parent);
-        render_cur_page(true);
-        prerender_next_page();
-    }
+	edje_object_part_text_set(item, "text", gettext(fit_strings[item_num]));
 }
 
-void
-FitModeDialog(Evas * e, Evas_Object * obj)
+static
+void fit_mode_handler(Evas_Object* choicebox __attribute__((unused)),
+                    int item_num,
+                    bool is_alt __attribute__((unused)),
+                    void* param)
 {
-    const char *initchoices[] = {
-        "1. Fit Text Width",
-        "2. Fit Width",
-        "3. Fit Height",
-        "4. Best Fit",
-        "5. Stretch Fit",
-        "6. No Fit",
-    };
+    parent_t *p = (parent_t*)param;
 
+    if (get_fit_mode() != item_num) {
+        set_fit_mode(item_num);
 
-    const char *values[] = {
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-    };
+		choicebox_invalidate_item(p->parent, p->item_num);
+		choicebox_pop(choicebox);
 
-    fitmodechoicebox =
-        init_choicebox(e, initchoices, values, 6, fitmode_choicehandler,
-                       "Fit Mode Settings", obj, NULL);
-
-    int x, y, w, h;
-    evas_object_geometry_get(fitmodechoicebox, &x, &y, &w, &h);
-    evas_object_move(fitmodechoicebox,
-                     (int) (((double) get_win_width() - w) / 2.0),
-                     (int) (((double) get_win_height() - h) / 2.0));
-
-}
-
-// trimming choicebox
-
-void
-trimming_choicehandler(Evas * e, Evas_Object * parent, int choice, bool lp)
-{
-    if (choice == 0) {
-        char *startval;
-        asprintf(&startval, "%d", get_lefttrim());
-        LeftTrimEntry(e, parent, startval);
-        free(startval);
-
-    } else if (choice == 1) {
-        char *startval;
-        asprintf(&startval, "%d", get_righttrim());
-        RightTrimEntry(e, parent, startval);
-        free(startval);
-
-    } else if (choice == 2) {
-        char *startval;
-        asprintf(&startval, "%d", get_toptrim());
-        TopTrimEntry(e, parent, startval);
-        free(startval);
-
-    } else if (choice == 3) {
-        char *startval;
-        asprintf(&startval, "%d", get_bottomtrim());
-        BottomTrimEntry(e, parent, startval);
-        free(startval);
-
-    }
-}
-
-void
-TrimmingDialog(Evas * e, Evas_Object * obj)
-{
-    const char *initchoices[] = {
-        "1. Left Trimming",
-        "2. Right Trimming",
-        "3. Top Trimming",
-        "4. Bottom Trimming",
-    };
-
-    char *lefttrim, *righttrim, *toptrim, *bottomtrim;
-    asprintf(&lefttrim, "%dpx", get_lefttrim());
-    asprintf(&righttrim, "%dpx", get_righttrim());
-    asprintf(&toptrim, "%dpx", get_toptrim());
-    asprintf(&bottomtrim, "%dpx", get_bottomtrim());
-    const char *values[] = {
-        lefttrim,
-        righttrim,
-        toptrim,
-        bottomtrim,
-    };
-
-    trimmingchoicebox =
-        init_choicebox(e, initchoices, values, 4, trimming_choicehandler,
-                       "Trimming Settings", obj, NULL);
-
-    int x, y, w, h;
-    evas_object_geometry_get(trimmingchoicebox, &x, &y, &w, &h);
-    evas_object_move(trimmingchoicebox,
-                     (int) (((double) get_win_width() - w) / 2.0),
-                     (int) (((double) get_win_height() - h) / 2.0));
-    free(lefttrim);
-    free(righttrim);
-    free(toptrim);
-    free(bottomtrim);
-}
-
-// Options dialogs
-
-
-
-void
-preferences_choicehandler(Evas * e, Evas_Object * parent, int choice,
-                          bool lp)
-{
-    if (choice == 0) {
-        char *startval;
-        asprintf(&startval, "%d", (int) (get_hpan_inc() * 100));
-        HPanEntry(e, parent, startval);
-        free(startval);
-    } else if (choice == 1) {
-        char *startval;
-        asprintf(&startval, "%d", (int) (get_vpan_inc() * 100));
-        VPanEntry(e, parent, startval);
-        free(startval);
-    }
-/*    else if(choice==2)
-    {
-        TrimmingDialog(e,parent);    
-    }
-*/
-    else if (choice == 2) {
-        char *startval;
-        asprintf(&startval, "%d", (int) (get_zoom_inc() * 100));
-        ZoomEntry(e, parent, startval);
-        free(startval);
-    } else if (choice == 3) {
-        FitModeDialog(e, parent);
-
-    }
-    /*    else if(choice==5)
-       {
-       set_antialias_mode(!get_antialias_mode());
-       update_label(e,preferenceschoicebox,5,OFF_ON_STRINGS[get_antialias_mode()]);
-       render_cur_page(true);
-       prerender_next_page();
-       }
-       else if(choice==6)
-       {
-       set_reader_mode(!get_reader_mode());
-       update_label(e,preferenceschoicebox,6,OFF_ON_STRINGS[get_reader_mode()]);
-       }
-     */
-}
-
-void
-PreferencesDialog(Evas * e, Evas_Object * obj)
-{
-    const char *initchoices[] = {
-        "1. Hor. Panning",
-        "2. Ver. Panning",
-        //      "3. Trimming",
-        "3. Zoom Increment",
-        "4. Fit Mode",
-        //    "6. Antialias",
-    };
-
-
-
-
-    char *zoom;
-    asprintf(&zoom, "%d%%", (int) (get_zoom_inc() * 100));
-    char *hpan;
-    asprintf(&hpan, "%d%%", (int) (get_hpan_inc() * 100));
-    char *vpan;
-    asprintf(&vpan, "%d%%", (int) (get_vpan_inc() * 100));
-
-    const char *values[] = {
-        hpan,
-        vpan,
-        //"",
-        zoom,
-        FIT_STRINGS[get_fit_mode()],
-        //    OFF_ON_STRINGS[get_antialias_mode()],
-    };
-
-    preferenceschoicebox =
-        init_choicebox(e, initchoices, values, 4,
-                       preferences_choicehandler, "LoCoPDF Settings", obj,
-                       NULL);
-    int x, y, w, h;
-    evas_object_geometry_get(preferenceschoicebox, &x, &y, &w, &h);
-    evas_object_move(preferenceschoicebox,
-                     (int) (((double) get_win_width() - w) / 2.0),
-                     (int) (((double) get_win_height() - h) / 2.0));
-
-    free(zoom);
-    free(hpan);
-    free(vpan);
-}
-
-//TOC Choicebox
-void TOCDialog(Evas * e, Evas_Object * obj, Ecore_List * list);
-void
-toc_choicehandler(Evas * e, Evas_Object * parent, int choice, bool lp)
-{
-    Ecore_List *list = (Ecore_List *) choicebox_get_userdata(e, parent);
-    loco_index_item curitem =
-        (loco_index_item) ecore_list_index_goto(list, choice);
-    Ecore_List *childlist = loco_ops->index_item_children_get(curitem);
-    if (!childlist) {
-        Evas_Object *curcb = parent;
-        Evas_Object *nextcb;
-        while ((nextcb = choicebox_get_parent(e, curcb))) {
-            fini_choicebox(e, curcb);
-            curcb = nextcb;
+        if(p->prev_title) {
+            Evas *canvas = evas_object_evas_get(choicebox);
+            SETTITLE(p->prev_title);
         }
-        evas_object_focus_set(curcb, 1);
-        goto_page(loco_ops->index_item_page_get(get_document(), curitem));
-    } else {
-        TOCDialog(e, parent, childlist);
+        free(p);
 
+        refresh = true;
     }
 }
 
-void
-TOCDialog(Evas * e, Evas_Object * obj, Ecore_List * list)
+static void fit_close_handler(Evas_Object* choicebox __attribute__((unused)),
+                          void *param __attribute__((unused)))
 {
-    int numchoices = ecore_list_count(list);
-    char **initchoices;
-    //char **values;
-    initchoices = (char **) malloc(sizeof(char *) * numchoices);
-    //values=(char **)malloc(sizeof(char*)*numchoices);
-    ecore_list_first_goto(list);
-    int i;
-    for (i = 0; i < numchoices; i++) {
-        asprintf(&(initchoices[i]), "%d. %s", (i % 8 + 1),
-                 loco_ops->index_item_title_get((loco_index_item)
-                                           ecore_list_next(list)));
-
+    parent_t *p = (parent_t*)param;
+    if(p) {
+        if(p->prev_title) {
+            Evas *canvas = evas_object_evas_get(choicebox);
+            SETTITLE(p->prev_title);
+        }
+        free(p);
     }
 
-    Evas_Object *tocchoicebox =
-        init_choicebox(e, (const char **) initchoices, NULL, numchoices,
-                       toc_choicehandler, "Table of Contents", obj,
-                       (void *) list);
-    for (i = 0; i < numchoices; i++) {
+    choicebox_pop(choicebox);
+}
 
-        free(initchoices[i]);
+void
+FitModeDialog(Evas *canvas, Evas_Object *parent, int item_num)
+{
+    parent_t *p = (parent_t*)malloc(sizeof(parent_t));
+    p->parent = parent;
+    p->item_num = item_num;
+    p->prev_title = GETTITLE;
+	choicebox_push(parent, canvas,
+        fit_mode_handler, fit_mode_draw_handler, fit_close_handler, "fit-mode", ASIZE(fit_strings), 1, p);
+
+    SETTITLE(gettext("Fit Mode"));
+}
+
+// TOC Choicebox
+
+typedef struct toc_items_t toc_items_t;
+struct toc_items_t {
+    loco_index_item curitem;
+    Ecore_List *l;
+    toc_items_t *prev;
+};
+
+#define TITLE(x) loco_ops->index_item_title_get((loco_index_item)(x))
+
+static void toc_draw_handler(Evas_Object* choicebox __attribute__((unused)),
+                         Evas_Object* item,
+                         int item_num,
+                         int page_position __attribute__((unused)),
+                         void* param __attribute__((unused)))
+{
+    toc_items_t *toc = (toc_items_t*)evas_object_data_get(choicebox, "toc-items");
+
+    char *s;
+
+    if(toc->curitem && item_num < 2) {
+        if(item_num == 0)
+            s = strdup("..");
+        else if(item_num == 1)
+            s = strdup(TITLE(toc->curitem));
+    } else {
+        if(toc->curitem)
+            item_num -= 2;
+
+        Ecore_List *l = ecore_list_index_goto(toc->l, item_num);
+        Ecore_List *cl = loco_ops->index_item_children_get(l);
+
+        if(cl && !ecore_list_empty_is(cl))
+            asprintf(&s, "+ %s", TITLE(l));
+        else
+            s = strdup(TITLE(l));
     }
-    //free(values);
-    free(initchoices);
 
-    int x, y, w, h;
-    evas_object_geometry_get(tocchoicebox, &x, &y, &w, &h);
-    evas_object_move(tocchoicebox,
-                     (int) (((double) get_win_width() - w) / 2.0),
-                     (int) (((double) get_win_height() - h) / 2.0));
+    edje_object_part_text_set(item, "text", s);
+    if(s)
+        free(s);
+}
 
+static
+void toc_handler(Evas_Object* choicebox __attribute__((unused)),
+                    int item_num,
+                    bool is_alt __attribute__((unused)),
+                    void* param)
+{
+    toc_items_t *toc = (toc_items_t*)evas_object_data_get(choicebox, "toc-items");
 
+    if(toc->curitem && item_num < 2) {
+        if(item_num == 0) {
+            toc_items_t *tmp = toc;
+            toc = toc->prev;
+            free(tmp);
+
+            int cnt = ecore_list_count(toc->l);
+            if(toc->curitem)
+                cnt += 2;
+
+            evas_object_data_set(choicebox, "toc-items", toc);
+            choicebox_set_size(choicebox, cnt);
+            choicebox_invalidate_interval(choicebox, 0, cnt);
+            if(cnt > 0) {
+                choicebox_scroll_to(choicebox, 0);
+                choicebox_set_selection(choicebox, -1);
+            }
+        } else if(item_num == 1) {
+            choicebox_pop(choicebox);
+            goto_page(loco_ops->index_item_page_get(get_document(), toc->curitem));
+        }
+    } else {
+        if(toc->curitem)
+            item_num -= 2;
+
+        loco_index_item curitem =
+            (loco_index_item) ecore_list_index_goto(toc->l, item_num);
+        Ecore_List *childlist = loco_ops->index_item_children_get(curitem);
+
+        if (!childlist) {
+            choicebox_pop(choicebox);
+            goto_page(loco_ops->index_item_page_get(get_document(), curitem));
+        } else {
+            toc_items_t *tmp = toc;
+            toc = (toc_items_t*)malloc(sizeof(toc_items_t));
+
+            toc->prev = tmp;
+            toc->curitem = curitem;
+            toc->l = childlist;
+
+            int cnt = 2 + ecore_list_count(toc->l);
+            evas_object_data_set(choicebox, "toc-items", toc);
+            choicebox_set_size(choicebox, cnt);
+            choicebox_invalidate_interval(choicebox, 0, cnt);
+            if(cnt > 0) {
+                choicebox_scroll_to(choicebox, 0);
+                choicebox_set_selection(choicebox, -1);
+            }
+        }
+    }
+}
+
+static void toc_close_handler(Evas_Object* choicebox __attribute__((unused)),
+                          void *param __attribute__((unused)))
+{
+    toc_items_t *toc, *prev;
+    toc = (toc_items_t*)evas_object_data_get(choicebox, "toc-items");
+    while(toc) {
+        prev = toc->prev;
+        free(toc);
+        toc = prev;
+    }
+
+    choicebox_pop(choicebox);
+}
+
+void
+TOCDialog(Evas *canvas, Evas_Object *parent, Ecore_List *list)
+{
+    toc_items_t *toc = (toc_items_t*)malloc(sizeof(toc_items_t));
+
+    toc->prev = NULL;
+    toc->curitem = NULL;
+    toc->l = list;
+
+	Evas_Object *choicebox = choicebox_push(NULL, canvas,
+        toc_handler, toc_draw_handler, toc_close_handler, "toc-choicebox", ecore_list_count(list), 1, NULL);
+
+    evas_object_data_set(choicebox, "toc-items", toc);
+
+    SETTITLE(gettext("Table Of Contents"));
 }

@@ -1,0 +1,32 @@
+styles {
+    style {
+        name, "item-texts";
+        base, "font=sans-serif font_size=28 color=#000 align=left valign=middle wrap=word";
+        tag, "inactive" "+color=#888";
+        tag, "/inactive" "-";
+    }
+}
+
+collections {
+   group {
+      name, "item-default";
+      parts {
+         part {
+            name, "text";
+            type, TEXTBLOCK;
+            multiline, 1;
+            description {
+               state, "default" 0.0;
+               color, 0 0 0 255;
+               text {
+                  style, "item-texts";
+                  max, 0 1;
+               }
+               align, 0 0.5;
+               rel1 { relative, 0.0 0.0; offset, 3 0; }
+               rel2 { relative, 1.0 1.0; offset, -4 -1; }
+            }
+         }
+      }
+   }
+}

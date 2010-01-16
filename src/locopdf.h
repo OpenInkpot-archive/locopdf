@@ -10,15 +10,16 @@
 #define FIT_STRETCH 4
 #define FIT_NO 5
 
-typedef void * loco_document;
-typedef void * loco_page;
-typedef void * loco_index_item;
+typedef void *loco_document;
+typedef void *loco_page;
+typedef void *loco_index_item;
 typedef int loco_link_action_kind;
 typedef struct _plugin_ops_t plugin_ops_t;
 
-char *get_theme_file();
 int get_win_width();
 int get_win_height();
+void set_zoom(double new_zoom);
+double get_zoom();
 double get_zoom_inc();
 void set_zoom_inc(double newzoominc);
 double get_hpan_inc();

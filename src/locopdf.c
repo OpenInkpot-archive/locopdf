@@ -31,6 +31,7 @@
 #include <stdbool.h>
 #include <err.h>
 
+#include <Eina.h>
 #include <Ecore.h>
 #include <Ecore_Evas.h>
 #include <Ecore_Con.h>
@@ -43,6 +44,7 @@
 
 #include <Ecore_Con.h>
 #include "dialogs.h"
+#include "help.h"
 #include "locopdf.h"
 #include "database.h"
 
@@ -52,8 +54,6 @@
 #include "plugin.h"
 #include "epdf_plugin.h"
 #include "edjvu_plugin.h"
-
-#define REL_THEME "themes/themes_oitheme.edj"
 
 /* Uzhosnakh */
 
@@ -288,7 +288,7 @@ get_tile(tile_t curtile, tile_orientation_t orient)
 }
 
 static void
-main_win_resize_handler(Ecore_Evas * main_win)
+main_win_resize_handler(Ecore_Evas *main_win)
 {
     int w, h;
     Evas *canvas = ecore_evas_get(main_win);
@@ -303,21 +303,19 @@ main_win_resize_handler(Ecore_Evas * main_win)
     Evas_Object *bg = evas_object_name_find(canvas, "background");
     evas_object_resize(bg, w, h);
 
+    Evas_Object *choicebox = evas_object_name_find(canvas, "main_choicebox_edje");
+    if(choicebox)
+        evas_object_resize(choicebox, w, h);
+
+    help_resize(canvas, w, h);
+
     render_cur_page();
 }
 
 static void
-main_win_delete_handler(Ecore_Evas * main_win)
+main_win_delete_handler(Ecore_Evas *main_win)
 {
     ecore_main_loop_quit();
-}
-
-char *
-get_theme_file()
-{
-    char *rel_theme;
-    asprintf(&rel_theme, "%s/%s", "/usr/share/locopdf", REL_THEME);
-    return rel_theme;
 }
 
 int
@@ -330,6 +328,18 @@ int
 get_win_height()
 {
     return winheight;
+}
+
+void
+set_zoom(double new_zoom)
+{
+    zoom = new_zoom;
+}
+
+double
+get_zoom()
+{
+    return zoom;
 }
 
 double
@@ -657,14 +667,26 @@ _quit()
 }
 
 static void
-_settings(Evas * canvas)
+_settings(Evas *canvas)
 {
     Evas_Object *bgobj = evas_object_name_find(canvas, "background");
     PreferencesDialog(evas, bgobj);
 }
 
 static void
-_zoom_in(Evas * canvas)
+_help(Evas *canvas)
+{
+    help_show(canvas);
+}
+
+static void
+_zoom(Evas *canvas)
+{
+    zoom_entry(canvas);
+}
+
+static void
+_zoom_in(Evas *canvas)
 {
     zoom += zoominc;
     if (zoom > 5.0)
@@ -673,7 +695,7 @@ _zoom_in(Evas * canvas)
 }
 
 static void
-_zoom_out(Evas * canvas)
+_zoom_out(Evas *canvas)
 {
     zoom -= zoominc;
     if (zoom < 0.2)
@@ -682,14 +704,14 @@ _zoom_out(Evas * canvas)
 }
 
 static void
-_go_to_page(Evas * canvas)
+_go_to_page(Evas *canvas)
 {
     Evas_Object *bgobj = evas_object_name_find(canvas, "background");
     GotoPageEntry(canvas, bgobj);
 }
 
 static void
-_toc(Evas * canvas)
+_toc(Evas *canvas)
 {
     if (pdf_index) {
         Evas_Object *bgobj = evas_object_name_find(canvas, "background");
@@ -707,7 +729,7 @@ reset_zoom_and_pan()
 }
 
 static void
-_key_handler(void *data, Evas * canvas, Evas_Object * obj,
+_key_handler(void *data, Evas *canvas, Evas_Object *obj,
              void *event_info)
 {
     Evas_Event_Key_Up *e = (Evas_Event_Key_Up *) event_info;
@@ -719,6 +741,10 @@ _key_handler(void *data, Evas * canvas, Evas_Object * obj,
         _quit();
     else if (!strcmp(action, "Settings"))
         _settings(canvas);
+    else if (!strcmp(action, "Zoom"))
+        _zoom(canvas);
+    else if (!strcmp(action, "Help"))
+        _help(canvas);
     else if (!strcmp(action, "PageUp") || !strcmp(action, "PanUp"))
         prev_page();
     else if (!strcmp(action, "PageDown") || !strcmp(action, "PanDown"))
@@ -817,7 +843,7 @@ restore_global_settings(char *filename)
 }
 
 static void
-set_active_win_id(Ecore_Evas * ee)
+set_active_win_id(Ecore_Evas *ee)
 {
     Ecore_X_Window root =
         ((xcb_screen_t *) ecore_x_default_screen_get())->root;
@@ -828,7 +854,7 @@ set_active_win_id(Ecore_Evas * ee)
 
 
 static void
-set_properties(Ecore_Evas * ee)
+set_properties(Ecore_Evas *ee)
 {
     Ecore_X_Window window = ecore_evas_software_x11_window_get(ee);
 

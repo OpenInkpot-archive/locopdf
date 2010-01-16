@@ -1,4 +1,8 @@
-SUBDIRS = src themes data
+SUBDIRS = src themes data po
 
 desktopdir = $(datarootdir)/applications
 desktop_DATA = locopdf.desktop
+
+install-exec-hook:
+	mkdir -p ${DESTDIR}/usr/share/help/locopdf
+	oi-help-compiler -u $(srcdir)/help ${DESTDIR}/usr/share/help/locopdf

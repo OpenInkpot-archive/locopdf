@@ -11,5 +11,8 @@ PKG_CHECK_MODULES(EPDF, [epdf])
 PKG_CHECK_MODULES(EDJVU, [edjvu])
 PKG_CHECK_MODULES(SQLITE, [sqlite3])
 PKG_CHECK_MODULES(LIBKEYS, [libkeys])
+PKG_CHECK_MODULES(LIBEOI, [libeoi])
+PKG_CHECK_MODULES(LIBCHOICEBOX, [libchoicebox])
 
-AC_OUTPUT(Makefile src/Makefile themes/Makefile data/Makefile)
+
+AC_OUTPUT(Makefile src/Makefile themes/Makefile data/Makefile po/Makefile)
