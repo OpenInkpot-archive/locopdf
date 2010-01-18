@@ -1,0 +1,84 @@
+# locopdf
+# This file is put in the public domain.
+# Alexander Kerner <lunohod@openinkpot.org>, 2010.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: locopdf 0.1\n"
+"Report-Msgid-Bugs-To: quickhand@openinkpot.org\n"
+"POT-Creation-Date: 2010-01-16 14:42+0100\n"
+"PO-Revision-Date: 2010-01-18 14:39+0200\n"
+"Last-Translator: Alexey <lozhkinet@gmail.com>\n"
+"Language-Team: Alexey Sednev <lozhkinet@gmail.com>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Poedit-Language: Ukrainian\n"
+"X-Poedit-Country: UKRAINE\n"
+
+#: src/dialogs.c:64
+msgid "Fit Text Width"
+msgstr "Вирівняти по ширині тексту"
+
+#: src/dialogs.c:65
+msgid "Fit Width"
+msgstr "Вирівняти по ширині сторінки"
+
+#: src/dialogs.c:66
+msgid "Fit Height"
+msgstr "Вирівняти по висоті"
+
+#: src/dialogs.c:67
+msgid "Best Fit"
+msgstr "Вмістити всю сторінку на екрані"
+
+#: src/dialogs.c:68
+msgid "Stretch Fit"
+msgstr "Розтягнути сторінку на весь екран"
+
+#: src/dialogs.c:69
+msgid "No Fit"
+msgstr "Немає вирівнювання"
+
+#: src/dialogs.c:87
+msgid "Go To Page"
+msgstr "Перейти на сторінку"
+
+#: src/dialogs.c:109
+#: src/dialogs.c:134
+msgid "Horizontal Panning"
+msgstr "Горизонтальний зсув"
+
+#: src/dialogs.c:161
+#: src/dialogs.c:172
+msgid "Vertical Panning"
+msgstr "Вертикальний зсув"
+
+#: src/dialogs.c:205
+#: src/dialogs.c:216
+#: src/dialogs.c:223
+msgid "Zoom"
+msgstr "Мастштаб"
+
+#: src/dialogs.c:257
+#: src/dialogs.c:268
+msgid "Zoom Increment"
+msgstr "Зміна масштабу"
+
+#: src/dialogs.c:280
+#: src/dialogs.c:390
+msgid "Fit Mode"
+msgstr "Налаштування відображення сторінки"
+
+#: src/dialogs.c:333
+msgid "Settings"
+msgstr "Налаштування"
+
+#: src/dialogs.c:525
+msgid "Table Of Contents"
+msgstr "Зміст"
+
+#: src/help.c:44
+msgid "Locopdf: Help"
+msgstr "Locopdf: Довідка"
+
