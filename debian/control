@@ -1,5 +1,5 @@
 Source: locopdf
-Section: media
+Section: gui
 Maintainer: Alexander Kerner <lunohod@openinkpot.org>
 Uploaders: Mikhail Gusarov <dottedmag@dottedmag.net>
 XCS-Cross-Host-Build-Depends: debhelper (>= 7), autoconf, automake, libtool, pkg-config, oi-help-compiler
@@ -15,6 +15,7 @@ Description: PDF reader for e-Ink devices
  of keys and slow screen refresh.
 
 Package: locopdf-dbg
+Section: debug
 Architecture: any
 Depends: locopdf (= ${binary:Version})
 Description: PDF reader for e-Ink devices -- debugging symbols
