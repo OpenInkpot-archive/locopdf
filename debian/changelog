@@ -1,3 +1,14 @@
+locopdf (0.1.23) zelazny; urgency=low
+
+  [ Alexander Kerner ]
+  * Rewrite GUI
+  * Fix package sections
+
+  [ lozhkinet ]
+  * l10n: Ukrainian translation of Locopdf
+
+ -- Alexander Kerner <lunohod@openinkpot.org>  Mon, 18 Jan 2010 22:38:37 +0100
+
 locopdf (0.1.22) zelazny; urgency=low
 
   * Rebuild due to EFL update
