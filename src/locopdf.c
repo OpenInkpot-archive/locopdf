@@ -30,6 +30,7 @@
 #include <string.h>
 #include <stdbool.h>
 #include <err.h>
+#include <libintl.h>
 
 #include <Eina.h>
 #include <Ecore.h>
@@ -1083,6 +1084,9 @@ main(int argc, char *argv[])
     edje_init();
 
     efreet_mime_init();
+
+    setlocale(LC_ALL, "");
+    textdomain("locopdf");
 
     keys = keys_alloc("locopdf");
 
