@@ -1086,6 +1086,7 @@ main(int argc, char *argv[])
     efreet_mime_init();
 
     setlocale(LC_ALL, "");
+    setlocale(LC_NUMERIC, "C");
     textdomain("locopdf");
 
     keys = keys_alloc("locopdf");
