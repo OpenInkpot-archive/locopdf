@@ -1,3 +1,10 @@
+locopdf (0.1.25) zelazny; urgency=low
+
+  * Add long-pressed wheel up/down to keymap
+  * Fix for broken rendering in non-C locales
+
+ -- Alexander Kerner <lunohod@openinkpot.org>  Thu, 21 Jan 2010 01:54:23 +0100
+
 locopdf (0.1.24) zelazny; urgency=low
 
   * Add missing locale initialization
