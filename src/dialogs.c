@@ -367,17 +367,18 @@ void fit_mode_handler(Evas_Object* choicebox __attribute__((unused)),
     if (get_fit_mode() != item_num) {
         set_fit_mode(item_num);
 
-		choicebox_invalidate_item(p->parent, p->item_num);
-		choicebox_pop(choicebox);
-
-        if(p->prev_title) {
-            Evas *canvas = evas_object_evas_get(choicebox);
-            SETTITLE(p->prev_title);
-        }
-        free(p);
-
+        choicebox_invalidate_item(p->parent, p->item_num);
         refresh = true;
     }
+
+    if(p->prev_title) {
+        Evas *canvas = evas_object_evas_get(choicebox);
+        SETTITLE(p->prev_title);
+    }
+
+    free(p);
+
+    choicebox_pop(choicebox);
 }
 
 static void fit_close_handler(Evas_Object* choicebox __attribute__((unused)),
