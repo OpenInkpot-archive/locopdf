@@ -95,14 +95,17 @@ static void entry_key_handler(void* param, Evas* e, Evas_Object* o, void* event_
 			edje_object_part_text_set(o, "entrytext", t);
 			free(t);
 		} else {
-			number->number = -1;
+            entry_number_t n = *number;
+            void *data = evas_object_data_get(o, "custom-data");
             entry_close(o, param);
-            number->handler(o, number->number, evas_object_data_get(o, "custom-data"));
+            n.handler(o, -1, data);
 		}
 	}
-	if(!strcmp(ev->keyname, "Return")) {
+    if(!strcmp(ev->keyname, "Return")) {
+        entry_number_t n = *number;
+        void *data = evas_object_data_get(o, "custom-data");
         entry_close(o, param);
-        number->handler(o, number->number, evas_object_data_get(o, "custom-data"));
+        n.handler(o, n.number, data);
     }
 }
 
