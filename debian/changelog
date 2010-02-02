@@ -1,3 +1,14 @@
+locopdf (0.1.27) zelazny; urgency=low
+
+  [ Tomasz Długosz ]
+  * l10n: initial polish translation
+
+  [ Alexander Kerner ]
+  * Add new help text
+  * Add locopdf.ini for help navigation
+
+ -- Alexander Kerner <lunohod@openinkpot.org>  Wed, 03 Feb 2010 00:45:57 +0100
+
 locopdf (0.1.26) zelazny; urgency=low
 
   * Fix settings menu header. #785
