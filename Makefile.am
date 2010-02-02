@@ -1,4 +1,4 @@
-SUBDIRS = src themes data po
+SUBDIRS = src themes data po help
 
 desktopdir = $(datarootdir)/applications
 desktop_DATA = locopdf.desktop
