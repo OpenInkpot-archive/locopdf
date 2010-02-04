@@ -1,0 +1,75 @@
+# SOME DESCRIPTIVE TITLE.
+# This file is put in the public domain.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: locopdf 0.1\n"
+"Report-Msgid-Bugs-To: quickhand@openinkpot.org\n"
+"POT-Creation-Date: 2010-01-16 14:42+0100\n"
+"PO-Revision-Date: 2010-02-04 23:19+0800\n"
+"Last-Translator: Zhang Cong <ftofficer@ftofficer.com>\n"
+"Language-Team: Simplified Chinese <zh_CN@zh.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: src/dialogs.c:64
+msgid "Fit Text Width"
+msgstr "适合文字宽度"
+
+#: src/dialogs.c:65
+msgid "Fit Width"
+msgstr "适合页面宽度"
+
+#: src/dialogs.c:66
+msgid "Fit Height"
+msgstr "适合页面高度"
+
+#: src/dialogs.c:67
+msgid "Best Fit"
+msgstr "适合最佳"
+
+#: src/dialogs.c:68
+msgid "Stretch Fit"
+msgstr "拉伸"
+
+#: src/dialogs.c:69
+msgid "No Fit"
+msgstr "无"
+
+#: src/dialogs.c:87
+msgid "Go To Page"
+msgstr "跳转到页面"
+
+#: src/dialogs.c:109 src/dialogs.c:134
+msgid "Horizontal Panning"
+msgstr "水平平移"
+
+#: src/dialogs.c:161 src/dialogs.c:172
+msgid "Vertical Panning"
+msgstr "垂直平移"
+
+#: src/dialogs.c:205 src/dialogs.c:216 src/dialogs.c:223
+msgid "Zoom"
+msgstr "缩放"
+
+#: src/dialogs.c:257 src/dialogs.c:268
+msgid "Zoom Increment"
+msgstr "放大"
+
+#: src/dialogs.c:280 src/dialogs.c:390
+msgid "Fit Mode"
+msgstr "匹配模式"
+
+#: src/dialogs.c:333
+msgid "Settings"
+msgstr "配置"
+
+#: src/dialogs.c:525
+msgid "Table Of Contents"
+msgstr "目录"
+
+#: src/help.c:44
+msgid "Locopdf: Help"
+msgstr "PDF阅读器(Locopdf)帮助"
