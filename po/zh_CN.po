@@ -1,7 +1,7 @@
 # SOME DESCRIPTIVE TITLE.
 # This file is put in the public domain.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
-#
+# 
 msgid ""
 msgstr ""
 "Project-Id-Version: locopdf 0.1\n"
@@ -54,10 +54,6 @@ msgstr "垂直平移"
 msgid "Zoom"
 msgstr "缩放"
 
-#: src/dialogs.c:257 src/dialogs.c:268
-msgid "Zoom Increment"
-msgstr "放大"
-
 #: src/dialogs.c:280 src/dialogs.c:390
 msgid "Fit Mode"
 msgstr "匹配模式"
@@ -73,3 +69,7 @@ msgstr "目录"
 #: src/help.c:44
 msgid "Locopdf: Help"
 msgstr "PDF阅读器(Locopdf)帮助"
+
+#: src/dialogs.c:257 src/dialogs.c:268
+msgid "Zoom Increment"
+msgstr "放大增量"
