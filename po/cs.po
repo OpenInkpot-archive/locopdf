@@ -1,0 +1,75 @@
+# Czech translation of locopdf.mainline.
+# This file is put in the public domain.
+# ben1981 <ben1981@centrum.cz>, 2010.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: locopdf 0.1\n"
+"Report-Msgid-Bugs-To: quickhand@openinkpot.org\n"
+"POT-Creation-Date: 2010-01-16 14:42+0100\n"
+"PO-Revision-Date: 2010-02-12 11:10+0100\n"
+"Last-Translator: ben1981 <ben1981@centrum.cz>\n"
+"Language-Team: Czech <openinkpot-l10n@googlegroups.com>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: src/dialogs.c:64
+msgid "Fit Text Width"
+msgstr "Přizpůsobit Šířce Textu"
+
+#: src/dialogs.c:65
+msgid "Fit Width"
+msgstr "Přizpůsobit Šířce"
+
+#: src/dialogs.c:66
+msgid "Fit Height"
+msgstr "Přizpůsobit Výšce"
+
+#: src/dialogs.c:67
+msgid "Best Fit"
+msgstr "Nejlepší Přizůsobení"
+
+#: src/dialogs.c:68
+msgid "Stretch Fit"
+msgstr "Roztáhnout"
+
+#: src/dialogs.c:69
+msgid "No Fit"
+msgstr "Nepřizpůsobovat"
+
+#: src/dialogs.c:87
+msgid "Go To Page"
+msgstr "Jít Na Stránku"
+
+#: src/dialogs.c:109 src/dialogs.c:134
+msgid "Horizontal Panning"
+msgstr "Horizontální Posun"
+
+#: src/dialogs.c:161 src/dialogs.c:172
+msgid "Vertical Panning"
+msgstr "Vertikální Posun"
+
+#: src/dialogs.c:205 src/dialogs.c:216 src/dialogs.c:223
+msgid "Zoom"
+msgstr "Zvětšení"
+
+#: src/dialogs.c:257 src/dialogs.c:268
+msgid "Zoom Increment"
+msgstr "Přírůstek Zvětšení"
+
+#: src/dialogs.c:280 src/dialogs.c:390
+msgid "Fit Mode"
+msgstr "Mód Přizpůsobení"
+
+#: src/dialogs.c:333
+msgid "Settings"
+msgstr "Nastavení"
+
+#: src/dialogs.c:525
+msgid "Table Of Contents"
+msgstr "Obsah"
+
+#: src/help.c:44
+msgid "Locopdf: Help"
+msgstr "Locopdf: Nápověda"
