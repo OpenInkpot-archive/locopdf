@@ -6,7 +6,7 @@
 #include <libeoi.h>
 #include "choices.h"
 
-#define DEFAULT_CHOICEBOX_THEME_FILE "/usr/share/choicebox/choicebox.edj"
+#define DEFAULT_CHOICEBOX_THEME_FILE "choicebox"
 
 bool
 choicebox_pop(Evas_Object *choicebox)
@@ -67,7 +67,7 @@ choicebox_push(Evas_Object *parent, Evas *canvas,
         NULL,
         DEFAULT_CHOICEBOX_THEME_FILE,
         "full",
-        own_edje ? THEME_DIR "/items.edj" : DEFAULT_CHOICEBOX_THEME_FILE,
+        own_edje ? "locopdf-items" : DEFAULT_CHOICEBOX_THEME_FILE,
         own_edje ? "item-default" : "item-settings",
         handler,
         draw_handler,

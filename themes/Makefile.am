@@ -1,6 +1,15 @@
-install-data-hook:
-	mkdir -p $(DESTDIR)/$(datadir)/locopdf/themes
-	$(INSTALL_DATA)				\
-		$(srcdir)/entrybox.edj	\
-		$(srcdir)/items.edj		\
-		$(DESTDIR)/$(datadir)/locopdf/themes
+MAINTAINERCLEANFILES = Makefile.in
+
+EDC= ${srcdir}/locopdf-entrybox.edc ${srcdir}/locopdf-items.edc
+EDJ = $(EDC:%.edc=%.edj)
+
+EXTRA_DIST = $(EDC)
+CLEANFILES = $(EDJ)
+
+themedir = $(datadir)/eoi/themes/default
+theme_DATA = $(EDJ)
+
+all: $(EDJ)
+%.edj: %.edc
+	edje_cc -id ${srcdir} -o $@ $<
+

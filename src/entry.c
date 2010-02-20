@@ -121,9 +121,9 @@ entry_n(Evas_Object *parent, Evas *canvas,
     l_data->handler = handler;
 
 
-	Evas_Object *obj = edje_object_add(canvas);
+
+	Evas_Object *obj = eoi_create_themed_edje(canvas, "locopdf-entrybox", "entrybox");
 	evas_object_name_set(obj, name);
-	edje_object_file_set(obj, THEME_DIR "/entrybox.edj", "entrybox");
 	evas_object_move(obj, 0, 0);
 	evas_object_resize(obj, 600, 800);
 
