@@ -1,5 +1,5 @@
 bin_PROGRAMS = locopdf
-locopdf_SOURCES = locopdf.c choices.c entry.c dialogs.c help.c database.c info_export.c epdf_plugin.c edjvu_plugin.c
+locopdf_SOURCES = locopdf.c choices.c entry.c dialogs.c database.c info_export.c epdf_plugin.c edjvu_plugin.c
 
 AM_CFLAGS = -DTHEME_DIR='"$(pkgdatadir)/themes/"'
 

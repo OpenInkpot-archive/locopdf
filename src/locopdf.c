@@ -45,7 +45,6 @@
 
 #include <Ecore_Con.h>
 #include "dialogs.h"
-#include "help.h"
 #include "locopdf.h"
 #include "database.h"
 
@@ -307,8 +306,6 @@ main_win_resize_handler(Ecore_Evas *main_win)
     Evas_Object *choicebox = evas_object_name_find(canvas, "main_choicebox_edje");
     if(choicebox)
         evas_object_resize(choicebox, w, h);
-
-    help_resize(canvas, w, h);
 
     render_cur_page();
 }
@@ -677,7 +674,8 @@ _settings(Evas *canvas)
 static void
 _help(Evas *canvas)
 {
-    help_show(canvas);
+    eoi_help_show(canvas,
+                  "locopdf", "index", gettext("Locopdf: Help"), NULL, NULL);
 }
 
 static void
