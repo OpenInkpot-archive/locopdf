@@ -288,24 +288,13 @@ get_tile(tile_t curtile, tile_orientation_t orient)
 }
 
 static void
-main_win_resize_handler(Ecore_Evas *main_win)
+image_resize_handler(Ecore_Evas *ee, int w, int h, void *param)
 {
-    int w, h;
-    Evas *canvas = ecore_evas_get(main_win);
-    evas_output_size_get(canvas, &w, &h);
-
     winwidth = w;
     winheight = h;
 
     cur_tile.w = w;
     cur_tile.h = h;
-
-    Evas_Object *bg = evas_object_name_find(canvas, "background");
-    evas_object_resize(bg, w, h);
-
-    Evas_Object *choicebox = evas_object_name_find(canvas, "main_choicebox_edje");
-    if(choicebox)
-        evas_object_resize(choicebox, w, h);
 
     render_cur_page();
 }
@@ -1114,7 +1103,7 @@ main(int argc, char *argv[])
     ecore_evas_title_set(ee, "LoCoPDF");
     ecore_evas_show(ee);
 
-    ecore_evas_callback_resize_set(ee, main_win_resize_handler);
+    eoi_resize_callback_add(ee, image_resize_handler, NULL);
     ecore_evas_callback_delete_request_set(ee, main_win_delete_handler);
 
     /* get a pointer our new Evas canvas */
@@ -1129,6 +1118,7 @@ main(int argc, char *argv[])
     evas_object_focus_set(bg, 1);
     evas_object_event_callback_add(bg, EVAS_CALLBACK_KEY_UP, _key_handler,
                                    NULL);
+    eoi_fullwindow_object_register(ee, bg);
     evas_object_show(bg);
 
     /* mutex for epdf access */

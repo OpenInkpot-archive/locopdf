@@ -79,10 +79,16 @@ choicebox_push(Evas_Object *parent, Evas *canvas,
     if(!main_canvas_edje) {
         main_canvas_edje = eoi_main_window_create(canvas);
         evas_object_name_set(main_canvas_edje, "main_choicebox_edje");
-        evas_object_move(main_canvas_edje, 0, 0);
-        evas_object_resize(main_canvas_edje, 600, 800);
-        evas_object_show(main_canvas_edje);
+
+        eoi_fullwindow_object_register(ecore_evas_ecore_evas_get(canvas),
+                main_canvas_edje);
     }
+
+    evas_object_move(main_canvas_edje, 0, 0);
+    int w, h;
+    evas_output_size_get(canvas, &w, &h);
+    evas_object_resize(main_canvas_edje, w, h);
+    evas_object_show(main_canvas_edje);
 
     Evas_Object* choicebox = choicebox_new(canvas, &info, data);
     if(!choicebox) {
