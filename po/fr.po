@@ -1,0 +1,71 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: locopdf 0.1\n"
+"Report-Msgid-Bugs-To: quickhand@openinkpot.org\n"
+"POT-Creation-Date: 2010-01-16 14:42+0100\n"
+"PO-Revision-Date: 2010-03-07 20:15+0000\n"
+"Last-Translator: Emma Tonkin <e.tonkin@ukoln.ac.uk>\n"
+"Language-Team: French <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: src/dialogs.c:64
+msgid "Fit Text Width"
+msgstr "Adapter à la largeur du texte"
+
+#: src/dialogs.c:65
+msgid "Fit Width"
+msgstr "Adapter a la largeur de la page"
+
+#: src/dialogs.c:66
+msgid "Fit Height"
+msgstr "Adapter a la hauteur de la page"
+
+#: src/dialogs.c:67
+msgid "Best Fit"
+msgstr "Adaptation automatique"
+
+#: src/dialogs.c:68
+msgid "Stretch Fit"
+msgstr "Adapter à l'écran"
+
+#: src/dialogs.c:69
+msgid "No Fit"
+msgstr "Sans adaptation"
+
+#: src/dialogs.c:87
+msgid "Go To Page"
+msgstr "Montrer la page"
+
+#: src/dialogs.c:109 src/dialogs.c:134
+msgid "Horizontal Panning"
+msgstr "Déplacement horizontal"
+
+#: src/dialogs.c:161 src/dialogs.c:172
+msgid "Vertical Panning"
+msgstr "Déplacement vertical"
+
+#: src/dialogs.c:205 src/dialogs.c:216 src/dialogs.c:223
+msgid "Zoom"
+msgstr "Zoom"
+
+#: src/dialogs.c:257 src/dialogs.c:268
+msgid "Zoom Increment"
+msgstr "Incrément de zoom"
+
+#: src/dialogs.c:280 src/dialogs.c:390
+msgid "Fit Mode"
+msgstr "Mode d'affichage"
+
+#: src/dialogs.c:333
+msgid "Settings"
+msgstr "Préférences"
+
+#: src/dialogs.c:525
+msgid "Table Of Contents"
+msgstr "Table des matières"
+
+#: src/help.c:44
+msgid "Locopdf: Help"
+msgstr "Locopdf: Aide"
