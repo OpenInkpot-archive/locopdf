@@ -11,3 +11,11 @@ config.h.in
 configure
 depcomp
 install-sh
+*.mo
+*.o
+Makefile
+config.statsu
+.deps
+src/locopdf
+*.edj
+config.status
