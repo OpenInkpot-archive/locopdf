@@ -31,3 +31,12 @@ Description: PDF reader for e-Ink devices -- N516 keymapping
  of keys and slow screen refresh.
  .
  This package contains keymapping configuration file for Hanvon N516.
+
+Package: locopdf-theme-azbooka
+Architecture: all
+Depends: dejavu-fonts
+Description: PDF reader for e-Ink devices -- Azbook theme
+ locopdf is a PDF reader designed to be useable on devices with limited amount
+ of keys and slow screen refresh.
+ .
+ This package contains Azbooka theme for locopdf

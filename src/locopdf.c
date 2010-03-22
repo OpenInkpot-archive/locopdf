@@ -31,6 +31,7 @@
 #include <stdbool.h>
 #include <err.h>
 #include <libintl.h>
+#include <locale.h>
 
 #include <Eina.h>
 #include <Ecore.h>
@@ -42,6 +43,7 @@
 #include <Evas.h>
 
 #include <libkeys.h>
+#include <libeoi_help.h>
 
 #include <Ecore_Con.h>
 #include "dialogs.h"
