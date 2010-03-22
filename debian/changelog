@@ -1,3 +1,19 @@
+locopdf (0.1.29) zelazny; urgency=low
+
+  [ Alexander Kerner ]
+  * Fix resize callbacks
+
+  [ lifanxi ]
+  * l10n: Updates to Chinese (simplified) (zh_CN) translation
+
+  [ Mirek ]
+  * l10n: Initial czech translation
+
+  [ etonkin ]
+  * l10n: initial French translation
+
+ -- Alexander Kerner <lunohod@openinkpot.org>  Tue, 09 Mar 2010 09:54:55 +0100
+
 locopdf (0.1.28) zelazny; urgency=low
 
   [ Alexander Kerner ]
