@@ -1,3 +1,9 @@
+locopdf (0.1.31) zelazny; urgency=low
+
+  * Move azbooka theme to locopdf-theme-azbooka package where it belongs.
+
+ -- Mikhail Gusarov <dottedmag@dottedmag.net>  Mon, 29 Mar 2010 04:49:44 +0700
+
 locopdf (0.1.30) zelazny; urgency=low
 
   * New Azbooka theme
