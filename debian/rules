@@ -34,7 +34,9 @@ install: build
 	dh_prep
 	dh_installdirs
 
-	$(MAKE) install DESTDIR=$(CURDIR)/debian/locopdf
+	$(MAKE) install DESTDIR=$(CURDIR)/debian/tmp
+
+	dh_install
 
 	mkdir -p $(CURDIR)/debian/locopdf-settings-n516/etc/keys
 	install -m 0644 $(CURDIR)/debian/n516.ini $(CURDIR)/debian/locopdf-settings-n516/etc/keys/locopdf.ini
