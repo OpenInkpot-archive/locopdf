@@ -1,3 +1,9 @@
+locopdf (0.1.32) zelazny; urgency=low
+
+  * Add /usr/share/keys to package
+
+ -- Alexander Kerner <lunohod@openinkpot.org>  Thu, 01 Apr 2010 08:59:20 +0200
+
 locopdf (0.1.31) zelazny; urgency=low
 
   * Move azbooka theme to locopdf-theme-azbooka package where it belongs.
