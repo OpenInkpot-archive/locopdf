@@ -1,3 +1,10 @@
+locopdf (0.1.33) zelazny; urgency=low
+
+  * Adjusted selection of theme elements for settings menu, as default
+    "settings" items were realigned.
+
+ -- Mikhail Gusarov <dottedmag@dottedmag.net>  Sat, 03 Apr 2010 03:21:43 +0700
+
 locopdf (0.1.32) zelazny; urgency=low
 
   * Add /usr/share/keys to package
