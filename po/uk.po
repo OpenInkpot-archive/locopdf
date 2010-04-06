@@ -1,7 +1,7 @@
 # locopdf
 # This file is put in the public domain.
 # Alexander Kerner <lunohod@openinkpot.org>, 2010.
-#
+# 
 msgid ""
 msgstr ""
 "Project-Id-Version: locopdf 0.1\n"
@@ -44,29 +44,19 @@ msgstr "Немає вирівнювання"
 msgid "Go To Page"
 msgstr "Перейти на сторінку"
 
-#: src/dialogs.c:109
-#: src/dialogs.c:134
+#: src/dialogs.c:109 src/dialogs.c:134
 msgid "Horizontal Panning"
 msgstr "Горизонтальний зсув"
 
-#: src/dialogs.c:161
-#: src/dialogs.c:172
+#: src/dialogs.c:161 src/dialogs.c:172
 msgid "Vertical Panning"
 msgstr "Вертикальний зсув"
 
-#: src/dialogs.c:205
-#: src/dialogs.c:216
-#: src/dialogs.c:223
-msgid "Zoom"
-msgstr "Мастштаб"
-
-#: src/dialogs.c:257
-#: src/dialogs.c:268
+#: src/dialogs.c:257 src/dialogs.c:268
 msgid "Zoom Increment"
 msgstr "Зміна масштабу"
 
-#: src/dialogs.c:280
-#: src/dialogs.c:390
+#: src/dialogs.c:280 src/dialogs.c:390
 msgid "Fit Mode"
 msgstr "Налаштування відображення сторінки"
 
@@ -82,3 +72,6 @@ msgstr "Зміст"
 msgid "Locopdf: Help"
 msgstr "Locopdf: Довідка"
 
+#: src/dialogs.c:205 src/dialogs.c:216 src/dialogs.c:223
+msgid "Zoom"
+msgstr "Масштаб"
