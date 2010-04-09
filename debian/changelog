@@ -1,3 +1,9 @@
+locopdf (0.1.34) zelazny; urgency=low
+
+  * Translations updated: English, French, Russian, Ukrainian
+
+ -- Mikhail Gusarov <dottedmag@dottedmag.net>  Fri, 09 Apr 2010 21:04:55 +0700
+
 locopdf (0.1.33) zelazny; urgency=low
 
   * Adjusted selection of theme elements for settings menu, as default
