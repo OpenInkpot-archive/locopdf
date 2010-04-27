@@ -1,0 +1,76 @@
+# SOME DESCRIPTIVE TITLE.
+# This file is put in the public domain.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+
+msgid ""
+msgstr ""
+"Project-Id-Version: locopdf 0.1\n"
+"Report-Msgid-Bugs-To: quickhand@openinkpot.org\n"
+"POT-Creation-Date: 2010-01-16 14:42+0100\n"
+"PO-Revision-Date: 2010-04-27 11:22+0100\n"
+"Last-Translator: Sven Bring <sven.bring@yahoo.se>\n"
+"Language-Team: Sweddish <openinkpot-l10n@googlegroups.com>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: src/dialogs.c:64
+msgid "Fit Text Width"
+msgstr "Anpassa till textbredd"
+
+#: src/dialogs.c:65
+msgid "Fit Width"
+msgstr "Anpassa till bredd"
+
+#: src/dialogs.c:66
+msgid "Fit Height"
+msgstr "Anpassa till höjd"
+
+#: src/dialogs.c:67
+msgid "Best Fit"
+msgstr "Bästa anpassning"
+
+#: src/dialogs.c:68
+msgid "Stretch Fit"
+msgstr "Anpassa med tänjning"
+
+#: src/dialogs.c:69
+msgid "No Fit"
+msgstr "Ingen anpassning"
+
+#: src/dialogs.c:87
+msgid "Go To Page"
+msgstr "Gå till sida"
+
+#: src/dialogs.c:109 src/dialogs.c:134
+msgid "Horizontal Panning"
+msgstr "Horisontell panorering"
+
+#: src/dialogs.c:161 src/dialogs.c:172
+msgid "Vertical Panning"
+msgstr "Vertikal panorering"
+
+#: src/dialogs.c:205 src/dialogs.c:216 src/dialogs.c:223
+msgid "Zoom"
+msgstr "Zoom"
+
+#: src/dialogs.c:257 src/dialogs.c:268
+msgid "Zoom Increment"
+msgstr "Zoomökning"
+
+#: src/dialogs.c:280 src/dialogs.c:390
+msgid "Fit Mode"
+msgstr "Anpassningsmetod"
+
+#: src/dialogs.c:333
+msgid "Settings"
+msgstr "Inställlningar"
+
+#: src/dialogs.c:525
+msgid "Table Of Contents"
+msgstr "Innehållsförteckning"
+
+#: src/help.c:44
+msgid "Locopdf: Help"
+msgstr "Locopdf: Hjälp"
