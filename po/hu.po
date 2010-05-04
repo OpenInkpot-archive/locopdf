@@ -1,7 +1,7 @@
 # Hungarian translations for PACKAGE package
 # This file is put in the public domain.
 # András Csehi <acsehi@gmail.com>, 2010.
-#
+# 
 msgid ""
 msgstr ""
 "Project-Id-Version: locopdf 0.1\n"
@@ -14,30 +14,6 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-
-#: src/dialogs.c:64
-msgid "Fit Text Width"
-msgstr ""
-
-#: src/dialogs.c:65
-msgid "Fit Width"
-msgstr ""
-
-#: src/dialogs.c:66
-msgid "Fit Height"
-msgstr ""
-
-#: src/dialogs.c:67
-msgid "Best Fit"
-msgstr ""
-
-#: src/dialogs.c:68
-msgid "Stretch Fit"
-msgstr ""
-
-#: src/dialogs.c:69
-msgid "No Fit"
-msgstr ""
 
 #: src/dialogs.c:87
 msgid "Go To Page"
@@ -59,10 +35,6 @@ msgstr "Nagyítás"
 msgid "Zoom Increment"
 msgstr "Nagyítás mértéke"
 
-#: src/dialogs.c:280 src/dialogs.c:390
-msgid "Fit Mode"
-msgstr ""
-
 #: src/dialogs.c:333
 msgid "Settings"
 msgstr "Beállítások"
@@ -74,3 +46,31 @@ msgstr "Tartalomjegyzék"
 #: src/help.c:44
 msgid "Locopdf: Help"
 msgstr "Locopdf: Segítség"
+
+#: src/dialogs.c:64
+msgid "Fit Text Width"
+msgstr "Szövegszélességre igazítás"
+
+#: src/dialogs.c:66
+msgid "Fit Height"
+msgstr "Magasságra igazítás"
+
+#: src/dialogs.c:65
+msgid "Fit Width"
+msgstr "Szélességre igazítás"
+
+#: src/dialogs.c:68
+msgid "Stretch Fit"
+msgstr "Széthúzva igazítás"
+
+#: src/dialogs.c:67
+msgid "Best Fit"
+msgstr "Láthatóra igazítás"
+
+#: src/dialogs.c:69
+msgid "No Fit"
+msgstr "Nincs igazítás"
+
+#: src/dialogs.c:280 src/dialogs.c:390
+msgid "Fit Mode"
+msgstr "Igazítás módja"
