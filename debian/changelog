@@ -1,8 +1,22 @@
+locopdf (0.1.35) zelazny; urgency=low
+
+  [ Sven Bring ]
+  * l10n: First Swedish translation for locopdf help
+
+  [ Vyacheslav Pereverzev ]
+  * l10n: Updates to Russian (ru) translation
+  * l10n: Updates to Ukrainian (uk) translation
+
+ -- Alexander Kerner <lunohod@openinkpot.org>  Fri, 11 Jun 2010 11:05:51 +0200
+
 locopdf (0.1.34) zelazny; urgency=low
 
+  [ Mikhail Gusarov ]
   * Translations updated: English, French, Russian, Ukrainian
 
- -- Mikhail Gusarov <dottedmag@dottedmag.net>  Fri, 09 Apr 2010 21:04:55 +0700
+  [ Alexander Kerner ]
+
+ -- Alexander Kerner <alex@hosaka.homeunix.net>  Fri, 11 Jun 2010 11:05:39 +0200
 
 locopdf (0.1.33) zelazny; urgency=low
 
