@@ -1,3 +1,9 @@
+locopdf (0.1.35.bradbury.1) bradbury; urgency=low
+
+  * bradbury branch
+
+ -- Alexander Kerner <lunohod@openinkpot.org>  Sat, 19 Jun 2010 00:54:21 +0200
+
 locopdf (0.1.35) zelazny; urgency=low
 
   [ Sven Bring ]
