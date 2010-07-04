@@ -1,5 +1,5 @@
 #include <edjvu/Edjvu.h>
-#include <Ecore.h>
+#include <Eina.h>
 #include "plugin.h"
 
 static plugin_ops_t plugin_ops;
@@ -97,7 +97,7 @@ djvu_index_item_title_get(const loco_index_item item)
     return edjvu_index_item_title_get(item);
 }
 
-Ecore_List *
+Eina_List *
 djvu_index_item_children_get(const loco_index_item item)
 {
     return edjvu_index_item_children_get(item);
@@ -118,14 +118,14 @@ djvu_index_item_page_get(const loco_document document,
     return edjvu_index_item_page_get(document, item);
 }
 
-Ecore_List *
+Eina_List *
 djvu_index_new(const loco_document document)
 {
     return edjvu_index_new(document);
 }
 
 void
-djvu_index_delete(Ecore_List * index)
+djvu_index_delete(Eina_List * index)
 {
     edjvu_index_delete(index);
 }

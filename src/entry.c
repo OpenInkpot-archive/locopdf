@@ -31,6 +31,7 @@
 #include <Edje.h>
 
 #include "entry.h"
+#include <libeoi_themes.h>
 
 #define MAXDIGITS	6
 

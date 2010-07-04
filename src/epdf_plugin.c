@@ -1,5 +1,5 @@
 #include <epdf/Epdf.h>
-#include <Ecore.h>
+#include <Eina.h>
 #include "plugin.h"
 
 static plugin_ops_t plugin_ops;
@@ -94,7 +94,7 @@ pdf_index_item_title_get(const loco_index_item item)
     return epdf_index_item_title_get(item);
 }
 
-Ecore_List *
+Eina_List *
 pdf_index_item_children_get(const loco_index_item item)
 {
     return epdf_index_item_children_get(item);
@@ -113,14 +113,14 @@ pdf_index_item_page_get(const loco_document document,
     return epdf_index_item_page_get(document, item);
 }
 
-Ecore_List *
+Eina_List *
 pdf_index_new(const loco_document document)
 {
     return epdf_index_new(document);
 }
 
 void
-pdf_index_delete(Ecore_List * index)
+pdf_index_delete(Eina_List * index)
 {
     epdf_index_delete(index);
 }

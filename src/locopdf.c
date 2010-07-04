@@ -43,6 +43,7 @@
 #include <Evas.h>
 
 #include <libkeys.h>
+#include <libeoi.h>
 #include <libeoi_help.h>
 
 #include <Ecore_Con.h>
@@ -66,7 +67,7 @@ pthread_t thread;
 Evas *evas;
 loco_document document;
 loco_page page;
-Ecore_List *pdf_index;
+Eina_List *pdf_index;
 char *filename;
 int dbres;
 pthread_mutex_t pdf_renderer_mutex = PTHREAD_MUTEX_INITIALIZER;
@@ -949,7 +950,7 @@ typedef struct {
     int size;
 } client_data_t;
 
-static int
+static Eina_Bool
 _client_add(void *param, int ev_type, void *ev)
 {
     Ecore_Con_Event_Client_Add *e = ev;
@@ -960,7 +961,7 @@ _client_add(void *param, int ev_type, void *ev)
     return 0;
 }
 
-static int
+static Eina_Bool
 _client_del(void *param, int ev_type, void *ev)
 {
     Ecore_Con_Event_Client_Del *e = ev;
@@ -996,7 +997,7 @@ _client_del(void *param, int ev_type, void *ev)
     return 0;
 }
 
-static int
+static Eina_Bool
 _client_data(void *param, int ev_type, void *ev)
 {
     Ecore_Con_Event_Client_Data *e = ev;

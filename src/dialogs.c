@@ -414,7 +414,7 @@ FitModeDialog(Evas *canvas, Evas_Object *parent, int item_num)
 typedef struct toc_items_t toc_items_t;
 struct toc_items_t {
     loco_index_item curitem;
-    Ecore_List *l;
+    Eina_List *l;
     toc_items_t *prev;
 };
 
@@ -439,10 +439,10 @@ static void toc_draw_handler(Evas_Object* choicebox __attribute__((unused)),
         if(toc->curitem)
             item_num -= 2;
 
-        Ecore_List *l = ecore_list_index_goto(toc->l, item_num);
-        Ecore_List *cl = loco_ops->index_item_children_get(l);
+        loco_index_item l = eina_list_nth(toc->l, item_num);
+        Eina_List *cl = loco_ops->index_item_children_get(l);
 
-        if(cl && !ecore_list_empty_is(cl))
+        if(cl && eina_list_count(cl) > 0)
             asprintf(&s, "+ %s", TITLE(l));
         else
             s = strdup(TITLE(l));
@@ -467,7 +467,7 @@ void toc_handler(Evas_Object* choicebox __attribute__((unused)),
             toc = toc->prev;
             free(tmp);
 
-            int cnt = ecore_list_count(toc->l);
+            int cnt = eina_list_count(toc->l);
             if(toc->curitem)
                 cnt += 2;
 
@@ -486,9 +486,8 @@ void toc_handler(Evas_Object* choicebox __attribute__((unused)),
         if(toc->curitem)
             item_num -= 2;
 
-        loco_index_item curitem =
-            (loco_index_item) ecore_list_index_goto(toc->l, item_num);
-        Ecore_List *childlist = loco_ops->index_item_children_get(curitem);
+        loco_index_item curitem = eina_list_nth(toc->l, item_num);
+        Eina_List *childlist = loco_ops->index_item_children_get(curitem);
 
         if (!childlist) {
             choicebox_pop(choicebox);
@@ -501,7 +500,7 @@ void toc_handler(Evas_Object* choicebox __attribute__((unused)),
             toc->curitem = curitem;
             toc->l = childlist;
 
-            int cnt = 2 + ecore_list_count(toc->l);
+            int cnt = 2 + eina_list_count(toc->l);
             evas_object_data_set(choicebox, "toc-items", toc);
             choicebox_set_size(choicebox, cnt);
             choicebox_invalidate_interval(choicebox, 0, cnt);
@@ -528,7 +527,7 @@ static void toc_close_handler(Evas_Object* choicebox __attribute__((unused)),
 }
 
 void
-TOCDialog(Evas *canvas, Evas_Object *parent, Ecore_List *list)
+TOCDialog(Evas *canvas, Evas_Object *parent, Eina_List *list)
 {
     toc_items_t *toc = (toc_items_t*)malloc(sizeof(toc_items_t));
 
@@ -537,7 +536,7 @@ TOCDialog(Evas *canvas, Evas_Object *parent, Ecore_List *list)
     toc->l = list;
 
 	Evas_Object *choicebox = choicebox_push(NULL, canvas,
-        toc_handler, toc_draw_handler, toc_close_handler, "toc-choicebox", ecore_list_count(list), 1, NULL);
+        toc_handler, toc_draw_handler, toc_close_handler, "toc-choicebox", eina_list_count(list), 1, NULL);
 
     evas_object_data_set(choicebox, "toc-items", toc);
 

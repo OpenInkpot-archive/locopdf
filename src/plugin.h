@@ -1,7 +1,7 @@
 #ifndef PLUGIN_H
 #define PLUGIN_H
 
-#include <Ecore.h>
+#include <Eina.h>
 #include "locopdf.h"
 
 struct _plugin_ops_t {
@@ -21,15 +21,15 @@ struct _plugin_ops_t {
     char *(*document_mod_date_get) (const loco_document doc);
      loco_index_item(*index_item_new) ();
     const char *(*index_item_title_get) (const loco_index_item item);
-    Ecore_List *(*index_item_children_get) (const loco_index_item
+    Eina_List *(*index_item_children_get) (const loco_index_item
                                                 item);
      loco_link_action_kind(*index_item_action_kind_get) (const
                                                              loco_index_item
                                                              item);
     int (*index_item_page_get) (const loco_document document,
                                     const loco_index_item item);
-    Ecore_List *(*index_new) (const loco_document document);
-    void (*index_delete) (Ecore_List * index);
+    Eina_List *(*index_new) (const loco_document document);
+    void (*index_delete) (Eina_List * index);
      loco_page(*page_new) (const loco_document doc);
     void (*page_delete) (loco_page page);
     void (*page_render) (loco_page page, Evas_Object * o);
