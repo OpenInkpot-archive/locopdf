@@ -1,3 +1,9 @@
+locopdf (0.1.36) zelazny; urgency=low
+
+  * Adjustment to ecore API changes
+
+ -- Alexander Kerner <lunohod@openinkpot.org>  Mon, 05 Jul 2010 07:27:05 +0200
+
 locopdf (0.1.35) zelazny; urgency=low
 
   [ Sven Bring ]
