@@ -1,3 +1,28 @@
+locopdf (0.1.37) zelazny; urgency=low
+
+  [ lozhkinet ]
+  * l10n: Updates to Ukrainian (uk) translation
+
+  [ Tomasz Długosz ]
+  * l10n: initial swedish translation
+
+  [ Sven Bring ]
+  * l10n: Updates to Swedish (sv) translation
+
+  [ Tomasz Długosz ]
+  * l10n: initial hungarian translation
+
+  [ András Csehi ]
+  * l10n: Updates to Hungarian (hu) translation
+
+  [ Michael ]
+  * l10n: Updates to German (de) translation
+
+  [ Alexander Kerner ]
+  * Use 8bpp engine
+
+ -- Alexander Kerner <lunohod@openinkpot.org>  Thu, 19 Aug 2010 09:44:37 +0200
+
 locopdf (0.1.36) zelazny; urgency=low
 
   * Adjustment to ecore API changes
