@@ -1099,7 +1099,7 @@ main(int argc, char *argv[])
         restore_global_settings(argv[1]);
 
     /* create our Ecore_Evas and show it */
-    ee = ecore_evas_software_x11_new(0, 0, 0, 0, 600, 800);
+    ee = ecore_evas_software_x11_8_new(0, 0, 0, 0, 600, 800);
 
     ecore_evas_borderless_set(ee, 0);
     ecore_evas_shaped_set(ee, 0);
