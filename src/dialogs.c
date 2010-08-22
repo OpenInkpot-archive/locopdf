@@ -40,9 +40,9 @@
 #define ASIZE(x) sizeof((x))/sizeof((x)[0])
 
 #define GETTITLE \
-    edje_object_part_text_get(evas_object_name_find(canvas, "main_choicebox_edje"), "title");
+    edje_object_part_text_get(evas_object_name_find(canvas, "main_choicebox_edje"), "title")
 #define SETTITLE(x) \
-    edje_object_part_text_set(evas_object_name_find(canvas, "main_choicebox_edje"), "title", (x));
+    edje_object_part_text_set(evas_object_name_find(canvas, "main_choicebox_edje"), "title", (x))
 
 void FitModeDialog(Evas *canvas, Evas_Object *parent, int item_num);
 
@@ -57,7 +57,7 @@ typedef struct menu_item_t {
 typedef struct parent_t {
     Evas_Object *parent;
     int item_num;
-    const char *prev_title;
+    char *prev_title;
 } parent_t;
 
 const char *fit_strings[] = {
@@ -374,6 +374,7 @@ void fit_mode_handler(Evas_Object* choicebox __attribute__((unused)),
     if(p->prev_title) {
         Evas *canvas = evas_object_evas_get(choicebox);
         SETTITLE(p->prev_title);
+        free(p->prev_title);
     }
 
     free(p);
@@ -389,6 +390,7 @@ static void fit_close_handler(Evas_Object* choicebox __attribute__((unused)),
         if(p->prev_title) {
             Evas *canvas = evas_object_evas_get(choicebox);
             SETTITLE(p->prev_title);
+            free(p->prev_title);
         }
         free(p);
     }
@@ -402,7 +404,7 @@ FitModeDialog(Evas *canvas, Evas_Object *parent, int item_num)
     parent_t *p = (parent_t*)malloc(sizeof(parent_t));
     p->parent = parent;
     p->item_num = item_num;
-    p->prev_title = GETTITLE;
+    p->prev_title = strdup(GETTITLE);
 	choicebox_push(parent, canvas,
         fit_mode_handler, fit_mode_draw_handler, fit_close_handler, "fit-mode", ASIZE(fit_strings), 1, p);
 
