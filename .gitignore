@@ -19,3 +19,4 @@ config.statsu
 src/locopdf
 *.edj
 config.status
+*.in.h
