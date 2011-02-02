@@ -1,18 +1,24 @@
-# locopdf
+# SOME DESCRIPTIVE TITLE.
 # This file is put in the public domain.
-# Alexander Kerner <lunohod@openinkpot.org>, 2010.
-#
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+# 
 msgid ""
 msgstr ""
-"Project-Id-Version: locopdf 0.1\n"
-"Report-Msgid-Bugs-To: quickhand@openinkpot.org\n"
-"POT-Creation-Date: 2010-01-16 14:42+0100\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Project-Id-Version: OpenInkpot\n"
+"Report-Msgid-Bugs-To: http://openinkpot.org/report/\n"
+"POT-Creation-Date: 2011-02-02 07:18+0300\n"
+"PO-Revision-Date: 2011-02-02 04:23+0000\n"
+"Last-Translator: dottedmag <dottedmag@dottedmag.net>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Language: ru\n"
+"Plural-Forms: nplurals=4; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2)\n"
+
+#: src/locopdf.c:670
+msgid "Locopdf: Help"
+msgstr "Locopdf: Справка"
 
 #: src/dialogs.c:64
 msgid "Fit Text Width"
@@ -38,38 +44,38 @@ msgstr "Растянуть страницу на весь экран"
 msgid "No Fit"
 msgstr "Нет выравнивания"
 
-#: src/dialogs.c:87
+#: src/dialogs.c:90
 msgid "Go To Page"
 msgstr "Перейти на страницу"
 
-#: src/dialogs.c:109 src/dialogs.c:134
+#: src/dialogs.c:110 src/dialogs.c:135
 msgid "Horizontal Panning"
 msgstr "Горизонтальный сдвиг"
 
-#: src/dialogs.c:161 src/dialogs.c:172
+#: src/dialogs.c:162 src/dialogs.c:173
 msgid "Vertical Panning"
 msgstr "Вертикальный сдвиг"
 
-#: src/dialogs.c:205 src/dialogs.c:216 src/dialogs.c:223
+#: src/dialogs.c:219 src/dialogs.c:230 src/dialogs.c:237
 msgid "Zoom"
 msgstr "Мастштаб"
 
-#: src/dialogs.c:257 src/dialogs.c:268
+#: src/dialogs.c:269 src/dialogs.c:280
 msgid "Zoom Increment"
 msgstr "Изменение масштаба"
 
-#: src/dialogs.c:280 src/dialogs.c:390
+#: src/dialogs.c:292 src/dialogs.c:411
 msgid "Fit Mode"
 msgstr "Настройка отображения страницы"
 
-#: src/dialogs.c:333
+#: src/dialogs.c:345
 msgid "Settings"
 msgstr "Настройки"
 
-#: src/dialogs.c:525
+#: src/dialogs.c:545
 msgid "Table Of Contents"
 msgstr "Содержание"
 
-#: src/help.c:44
-msgid "Locopdf: Help"
-msgstr "Locopdf: Справка"
+#: po/locopdf.desktop.in.h:1
+msgid "PDF/DjVu viewer"
+msgstr ""
