@@ -4,7 +4,7 @@ locopdf (0.1.38) zelazny; urgency=low
   * Fix header text in choicebox
   * Fix setting ACTIVE_DOC properties
 
- -- Alexander Kerner <alex@hosaka.homeunix.net>  Thu, 16 Jun 2011 17:17:01 +0200
+ -- Alexander Kerner <lunohod@openinkpot.org>  Thu, 16 Jun 2011 17:17:01 +0200
 
 locopdf (0.1.37) zelazny; urgency=low
 
