@@ -838,7 +838,7 @@ set_active_win_id(Ecore_Evas *ee)
 {
     Ecore_X_Window root =
         ((xcb_screen_t *) ecore_x_default_screen_get())->root;
-    Ecore_X_Window window = ecore_evas_software_x11_window_get(ee);
+    Ecore_X_Window window = ecore_evas_software_x11_8_window_get(ee);
 
     wprop_set_active_win_id(root, window);
 }
@@ -847,7 +847,7 @@ set_active_win_id(Ecore_Evas *ee)
 static void
 set_properties(Ecore_Evas *ee)
 {
-    Ecore_X_Window window = ecore_evas_software_x11_window_get(ee);
+    Ecore_X_Window window = ecore_evas_software_x11_8_window_get(ee);
 
     if(loco_ops->document_author_get)
         wprop_set_string(window, "ACTIVE_DOC_AUTHOR",
