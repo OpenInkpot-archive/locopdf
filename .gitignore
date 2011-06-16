@@ -20,3 +20,4 @@ src/locopdf
 *.edj
 config.status
 *.in.h
+*~
