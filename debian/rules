@@ -41,6 +41,9 @@ install: build
 	mkdir -p $(CURDIR)/debian/locopdf-settings-n516/etc/keys
 	install -m 0644 $(CURDIR)/debian/n516.ini $(CURDIR)/debian/locopdf-settings-n516/etc/keys/locopdf.ini
 
+	mkdir -p $(CURDIR)/debian/locopdf-settings-prs505/etc/keys
+	install -m 0644 $(CURDIR)/debian/prs505.ini $(CURDIR)/debian/locopdf-settings-prs505/etc/keys/locopdf.ini
+
 binary-arch: build install
 	dh_testdir
 	dh_testroot

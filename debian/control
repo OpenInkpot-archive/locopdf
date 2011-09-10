@@ -24,6 +24,14 @@ Description: PDF reader for e-Ink devices -- debugging symbols
  .
  This package contains debugging symbols for locopdf.
 
+Package: locopdf-settings-prs505
+Architecture: all
+Description: PDF reader for e-Ink devices -- PRS505 keymapping
+ locopdf is a PDF reader designed to be useable on devices with limited amount
+ of keys and slow screen refresh.
+ .
+ This package contains keymapping configuration file for Sony PRS505.
+
 Package: locopdf-settings-n516
 Architecture: all
 Description: PDF reader for e-Ink devices -- N516 keymapping
